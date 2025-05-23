@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Device Data - {{ device.device_id }}{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-700">Device Data: {{ device.device_id }}</h1>
+<p class="text-gray-500 mt-1">Detailed metrics for the device</p>
+
+<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-gradient-to-r from-blue-400 to-blue-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
+        <h3 class="text-xl font-semibold text-white">Total Distance Traveled</h3>
+        <p class="text-3xl font-bold text-white">{{ metrics.total_distance|floatformat:2 }} km</p>
+    </div>
+
+    <div class="bg-gradient-to-r from-green-400 to-green-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
+        <h3 class="text-xl font-semibold text-white">Average Speed</h3>
+        <p class="text-3xl font-bold text-white">{{ metrics.average_speed|floatformat:1 }} km/h</p>
+    </div>
+
+    <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
+        <h3 class="text-xl font-semibold text-white">Max/Min Speed</h3>
+        <p class="text-gray-100">Max: {{ metrics.max_speed|floatformat:1 }} km/h</p>
+        <p class="text-gray-100">Min: {{ metrics.min_speed|floatformat:1 }} km/h</p>
+    </div>
+
+    <div class="bg-gradient-to-r from-indigo-400 to-indigo-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
+        <h3 class="text-xl font-semibold text-white">Weekly Metrics (Last 7 Days)</h3>
+        <p class="text-gray-100">Total Distance: {{ metrics.weekly_data.total_distance|floatformat:2 }} km</p>
+        <p class="text-gray-100">Average Speed: {{ metrics.weekly_data.average_speed|floatformat:1 }} km/h</p>
+    </div>
+
+    <div class="bg-gradient-to-r from-red-400 to-red-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
+        <h3 class="text-xl font-semibold text-white">Rash Driving Instances</h3>
+        <p class="text-3xl font-bold text-white">{{ metrics.rash_driving_instances }} times</p>
+        <p class="text-gray-100 text-sm">Speed > 80 km/h</p>
+    </div>
+
+    <div class="bg-gradient-to-r from-teal-400 to-teal-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
+        <h3 class="text-xl font-semibold text-white">Vehicle On/Off Changes</h3>
+        <p class="text-3xl font-bold text-white">{{ metrics.vehicle_status_changes }}</p>
+        <p class="text-gray-100">Number of status changes</p>
+    </div>
+</div>
+
+
+
+    <canvas id="speedChart" class="mt-6"></canvas>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    var ctx = document.getElementById('speedChart').getContext('2d');
+    var speedChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Total Avg', 'Weekly Avg', 'Max', 'Min'],
+            datasets: [{
+                label: 'Speed (km/h)',
+                data: [{{ metrics.average_speed }}, {{ metrics.weekly_data.average_speed }}, {{ metrics.max_speed }}, {{ metrics.min_speed }}],
+                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                fill: true
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+
+{% endblock %}

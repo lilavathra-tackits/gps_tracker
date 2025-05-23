@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - {{ data.alias }}{% endblock %}
+{% block content %}
+    
+<h2 class="text-2xl font-bold mb-4">Dashboard for {{ data.alias }}</h2>
+<p class="text-gray-600 mb-4">Device ID: {{ data.deviceId }}</p>
+
+<!-- First Row: Speed, Battery, Compass -->
+<div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <!-- Speed -->
+    <div class="bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center">
+        <h3 class="text-lg font-semibold text-gray-700">Speed</h3>
+        <canvas id="speedometer" class="mt-4 max-w-[250px] h-[200px] mx-auto"></canvas>
+        <p>Speed: 
+            <span class="text-gray-600 mt-2 text-base" id="speedValue">
+                {% if data.has_data %}{{ data.speed|floatformat:1 }} km/h{% else %}No data{% endif %}
+            </span>
+        </p>
+    </div>
+
+    <!-- Battery -->
+    <div class="bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center">
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">Battery Charge</h3>
+        <canvas id="batteryGauge" width="200" height="200" class="mx-auto block"></canvas>
+        <p>Battery: 
+            <span class="text-gray-600 mt-2 text-base" id="batteryValue">
+                {% if data.has_data %}{{ data.charge }}%{% else %}No data{% endif %}
+            </span>
+        </p>
+    </div>
+
+    <!-- Compass -->
+    <div class="bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Heading</h3>
+        <canvas id="compass" width="150" height="150" class="mx-auto"></canvas>
+        <p>Heading: 
+            <span class="text-gray-600 mt-2 text-base" id="heading">
+                {% if data.has_data %}{{ data.heading }}°{% else %}No data{% endif %}
+            </span>
+        </p>
+    </div>
+</div>
+
+<!-- Location Details -->
+<div class="mt-6">
+    <div class="bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Location Details</h3>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Left: Coordinates and Altitude -->
+            <div class="flex-1">
+                <ul class="text-sm space-y-3 text-gray-600">
+                    <li class="flex items-center">
+                        <i class="fas fa-map-marker-alt text-blue-600 mr-3 text-lg"></i>
+                        <span>Latitude: <span id="latitude" class="font-medium text-gray-800">{% if data.has_data %}{{ data.location.latitude }}{% else %}No data{% endif %}</span></span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fa-solid fa-globe text-blue-600 mr-3 text-lg"></i>
+                        <span>Longitude: <span id="longitude" class="font-medium text-gray-800">{% if data.has_data %}{{ data.location.longitude }}{% else %}No data{% endif %}</span></span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fa-brands fa-think-peaks text-blue-600 mr-3 text-lg"></i>
+                        <span>Altitude: <span id="altitude" class="font-medium text-gray-800">{% if data.has_data %}{{ data.location.altitude }} m (comming soon){% else %}No data{% endif %}</span></span>
+                    </li>
+                </ul>
+            </div>
+            <!-- Right: Battery, Distance, and Heading -->
+            <div class="flex-1">
+                <ul class="text-sm space-y-3 text-gray-600">
+                    <li class="flex items-center">
+                        <i class="fas fa-battery-half text-blue-600 mr-3 text-lg"></i>
+                        <span>Battery: <span id="charge" class="font-medium text-gray-800">{% if data.has_data %}{{ data.charge }}%{% else %}No data{% endif %}</span></span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-road text-blue-600 mr-3 text-lg"></i>
+                        <span>Total Distance (24h): <span id="totalDistance" class="font-medium text-gray-800">{% if data.has_data %}{{ data.total_distance|floatformat:2 }} m{% else %}No data{% endif %}</span></span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fa-solid fa-compass text-blue-600 mr-3 text-lg"></i>
+                        <span>Heading: <span id="locationHeading" class="font-medium text-gray-800">{% if data.has_data %}{{ data.heading|floatformat:2 }}°{% else %}No data{% endif %}</span></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Section -->
+<div class="mt-8 bg-gradient-to-br from-white to-blue-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Device Location</h2>
+    <div id="map" class="h-[300px] sm:h-[400px] w-full rounded-lg"></div>
+    <p class="text-center text-sm sm:text-base font-medium text-gray-700 mt-4">
+        🌍 Latitude: <span id="latitudeDisplay">{% if data.has_data %}{{ data.location.latitude }}{% else %}No data{% endif %}</span> |
+        Longitude: <span id="longitudeDisplay">{% if data.has_data %}{{ data.location.longitude }}{% else %}No data{% endif %}</span>
+    </p>
+    <p class="text-red-600 font-bold mt-2 hidden text-center" id="error"></p>
+    <p class="text-gray-500 italic mt-2 hidden text-center" id="loading">Fetching latest data...</p>
+</div>
+
+        {% comment %} </div>
+         <a href="{% url 'maintenance_status' device_id=device.device_id %}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4">
+            <i class="bi bi-tools"></i> Maintenance Status
+        </a>  {% endcomment %}
+
+
+
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+    #map { height: 400px; width: 100%; border-radius: 8px; }
+    #compass { max-width: 100%; height: auto; }
+</style>
+<script>
+    // Initial Data
+    const initialData = {
+        charge: parseInt("{{ data.charge|default:'0' }}"),
+        speed: parseFloat("{{ data.speed|default:'0' }}"),
+        hasData: {{ data.has_data|yesno:"true,false" }},
+        latitude: parseFloat("{{ data.location.latitude|default:'0' }}"),
+        longitude: parseFloat("{{ data.location.longitude|default:'0' }}"),
+        heading: parseFloat("{{ data.heading|default:'0' }}")
+    };
+
+    // Battery Gauge
+    function drawBatteryGauge(canvas, percentage) {
+        const ctx = canvas.getContext("2d");
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(width, height) / 2 - 15;
+        ctx.clearRect(0, 0, width, height);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#E5E7EB";
+        ctx.lineWidth = 15;
+        ctx.stroke();
+        const endAngle = (percentage / 100) * 2 * Math.PI;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle - Math.PI / 2);
+        ctx.strokeStyle = percentage > 60 ? "#22C55E" : percentage > 30 ? "#FACC15" : "#EF4444";
+        ctx.lineWidth = 15;
+        ctx.lineCap = "round";
+        ctx.stroke();
+        ctx.fillStyle = "#1F2937";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${percentage}%`, centerX, centerY);
+    }
+    const batteryCanvas = document.getElementById("batteryGauge");
+    if (initialData.hasData) {
+        drawBatteryGauge(batteryCanvas, initialData.charge);
+        $('#charge').text(initialData.charge + '%');
+        $('#batteryValue').text(initialData.charge + '%');
+    } else {
+        $('#charge').text('No data');
+        $('#batteryValue').text('No data');
+    }
+
+    // Speedometer Gauge
+    function drawSpeedometer(canvas, speed) {
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const maxSpeed = 200;
+        const radius = Math.min(width, height) * 0.4;
+        const centerX = width / 2;
+        const centerY = height * 0.7;
+        ctx.clearRect(0, 0, width, height);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI, false);
+        ctx.lineWidth = 20;
+        ctx.strokeStyle = '#E0E0E0';
+        ctx.stroke();
+        const gradient = ctx.createLinearGradient(0, 0, width, 0);
+        gradient.addColorStop(0, '#4CAF50');
+        gradient.addColorStop(0.5, '#FBBF24');
+        gradient.addColorStop(1, '#EF4444');
+        ctx.beginPath();
+        const speedAngle = Math.PI + (speed / maxSpeed) * Math.PI;
+        ctx.arc(centerX, centerY, radius, Math.PI, speedAngle, false);
+        ctx.lineWidth = 20;
+        ctx.strokeStyle = gradient;
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#6B7280';
+        for (let i = 0; i <= maxSpeed; i += 20) {
+            const angle = Math.PI + (i / maxSpeed) * Math.PI;
+            const innerRadius = radius - 10;
+            const outerRadius = radius + 10;
+            ctx.beginPath();
+            ctx.moveTo(centerX + innerRadius * Math.cos(angle), centerY + innerRadius * Math.sin(angle));
+            ctx.lineTo(centerX + outerRadius * Math.cos(angle), centerY + outerRadius * Math.sin(angle));
+            ctx.stroke();
+            if (i % 40 === 0) {
+                const labelRadius = radius + 20;
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#374151';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const labelX = centerX + labelRadius * Math.cos(angle);
+                const labelY = centerY + labelRadius * Math.sin(angle);
+                ctx.fillText(i, labelX, labelY);
+            }
+        }
+        const needleAngle = Math.PI + (speed / maxSpeed) * Math.PI;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + radius * 0.9 * Math.cos(needleAngle), centerY + radius * 0.9 * Math.sin(needleAngle));
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#1F2937';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+        ctx.fillStyle = '#1F2937';
+        ctx.fill();
+        ctx.font = '20px Arial';
+        ctx.fillStyle = '#374151';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${speed.toFixed(1)} km/h`, centerX, centerY + radius + 40);
+    }
+    const speedometerCanvas = document.getElementById("speedometer");
+    speedometerCanvas.width = 300;
+    speedometerCanvas.height = 200;
+    if (initialData.hasData) {
+        drawSpeedometer(speedometerCanvas, initialData.speed);
+    }
+
+    // Compass with North at Top and Animation
+    function drawCompass(canvas, heading, animate = false) {
+        const ctx = canvas.getContext("2d");
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(width, height) / 2 - 10;
+    
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+    
+        // Ensure heading is valid
+        const validHeading = !isNaN(heading) && heading >= 0 && heading < 360 ? heading : 0;
+    
+        // Background circle
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+        gradient.addColorStop(0, '#FFFFFF');
+        gradient.addColorStop(1, '#DBEAFE');
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        ctx.strokeStyle = '#60A5FA';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    
+        // Direction labels
+        const directions = ['N', 'E', 'S', 'W'];
+        for (let i = 0; i < 4; i++) {
+            const angle = (i * 90) * Math.PI / 180 - Math.PI / 2;
+            const x = centerX + (radius - 15) * Math.cos(angle);
+            const y = centerY + (radius - 15) * Math.sin(angle);
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#1F2937';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(directions[i], x, y);
+        }
+    
+        // Draw compass needle
+        const angle = (heading - 90) * Math.PI / 180;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + radius * 0.85 * Math.cos(angle), centerY + radius * 0.85 * Math.sin(angle));
+        ctx.strokeStyle = '#EF4444';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+    
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#1F2937';
+        ctx.fill();
+    }
+    
+
+    // Initialize Compass with Responsive Size
+    const compassCanvas = document.getElementById("compass");
+    function resizeCompass() {
+        const container = compassCanvas.parentElement;
+        const size = Math.min(container.clientWidth * 0.8, 150); // Max 150px, 80% of container
+        compassCanvas.width = size;
+        compassCanvas.height = size;
+        if (initialData.hasData) {
+            drawCompass(compassCanvas, initialData.heading);
+            $('#heading').text(initialData.heading + '°');
+            $('#locationHeading').text(initialData.heading + '°');
+        } else {
+            drawCompass(compassCanvas, 0);
+            $('#heading').text('No data');
+            $('#locationHeading').text('No data');
+        }
+    }
+    resizeCompass();
+    window.addEventListener('resize', resizeCompass);
+
+    // Initialize Leaflet Map
+    const map = L.map('map').setView([initialData.hasData ? initialData.latitude : 13.0827, initialData.hasData ? initialData.longitude : 80.2707], 19);
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+    let marker = null;
+    if (initialData.hasData) {
+        marker = L.marker([initialData.latitude, initialData.longitude]).addTo(map);
+    }
+    tileLayer.on('tileerror', function(error, tile) {
+        console.warn('Tile loading error:', error, tile);
+        $('#error').text('Error loading map tiles. Some map data may be missing.').show();
+    });
+
+    // AJAX Polling for Latest Data
+    (function pollData() {
+        const fetchUrl = "{% url 'device_history_data' device_id=device.device_id %}";
+        const errorDiv = $('#error');
+        const loadingDiv = $('#loading');
+        let lastTimestamp = "{{ data.timestamp|default:'' }}";
+        let retryDelay = 4000;
+        const maxDelay = 16000;
+
+        function updateData() {
+            console.log('Polling device_history_data with limit=1');
+            $.ajax({
+                url: fetchUrl,
+                method: 'GET',
+                data: {
+                    limit: 1,
+                    time_threshold: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+                },
+                dataType: 'json',
+                beforeSend: function() {
+                    loadingDiv.show();
+                    errorDiv.hide();
+                },
+                success: function(data) {
+                    console.log('Received data:', data);
+                    if (data.error) {
+                        console.error('Backend error:', data.error);
+                        errorDiv.text(`Error: ${data.error}`).show();
+                        retryDelay = Math.min(retryDelay * 2, maxDelay);
+                        setTimeout(updateData, retryDelay);
+                        return;
+                    }
+                    if (data.data_points && data.data_points.length > 0) {
+                        const latest = data.data_points[0];
+                        if (latest.timestamp !== lastTimestamp) {
+                            console.log('Using new data:', latest);
+                            lastTimestamp = latest.timestamp;
+                            if (marker) {
+                                marker.setLatLng([latest.latitude, latest.longitude]);
+                            } else {
+                                marker = L.marker([latest.latitude, latest.longitude]).addTo(map);
+                            }
+                            map.panTo([latest.latitude, latest.longitude], { animate: true, duration: 0.5 });
+                            $('#timestamp').text(latest.timestamp);
+                            $('#latitude').text(latest.latitude);
+                            $('#longitude').text(latest.longitude);
+                            $('#latitudeDisplay').text(latest.latitude);
+                            $('#longitudeDisplay').text(latest.longitude);
+                            $('#altitude').text((latest.altitude || 0) + ' m');
+                            $('#speedValue').text((latest.speed || 0).toFixed(1) + ' km/h');
+                            $('#charge').text(latest.charge + '%');
+                            $('#batteryValue').text(latest.charge + '%');
+                            $('#totalDistance').text((data.total_distance || 0).toFixed(2) + ' m');
+                            $('#heading').text((latest.heading || 0) + '°');
+                            $('#locationHeading').text((latest.heading || 0) + '°');
+                            drawSpeedometer(speedometerCanvas, latest.speed || 0);
+                            drawBatteryGauge(batteryCanvas, latest.charge || 0);
+                            drawCompass(compassCanvas, latest.heading || 0, true); // Enable animation
+                        } else {
+                            console.log('No new data (same timestamp)');
+                        }
+                    } else {
+                        console.warn('No data points received');
+                        errorDiv.text('No data available for this device.').show();
+                    }
+                    retryDelay = 4000;
+                    setTimeout(updateData, retryDelay);
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', status, error, xhr.responseText);
+                    errorDiv.text(`Failed to fetch data: ${xhr.statusText || 'Unknown error'}`).show();
+                    retryDelay = Math.min(retryDelay * 2, maxDelay);
+                    setTimeout(updateData, retryDelay);
+                },
+                complete: function() {
+                    loadingDiv.hide();
+                }
+            });
+        }
+
+        updateData();
+    })();
+</script>
+{% endblock %}

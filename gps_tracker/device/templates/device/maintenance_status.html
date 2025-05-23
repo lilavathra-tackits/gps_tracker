@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Maintenance - {{ device.device_id }}{% endblock %}
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4">Maintenance for {{ device.device_id }}</h2>
+    <form method="post" class="space-y-4 mb-6">
+        {% csrf_token %}
+        <div>
+            <label for="status" class="block text-sm font-medium text-gray-700">Maintenance Status</label>
+            <input type="text" name="status" id="status" value="Maintenance completed" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <i class="bi bi-tools"></i> Update Maintenance
+        </button>
+    </form>
+    <h3 class="text-lg font-semibold mb-2">Maintenance Records</h3>
+    {% if records %}
+        <ul class="space-y-2">
+            {% for record in records %}
+                <li class="border p-2 rounded">
+                    <p>Status: {{ record.status }}</p>
+                    <p class="text-sm text-gray-600">Time: {{ record.timestamp|date:"Y-m-d H:i" }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-gray-600">No maintenance records.</p>
+    {% endif %}
+    <a href="{% url 'dashboard' device_id=device.device_id %}" class="inline-block mt-4 text-blue-600 hover:underline">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

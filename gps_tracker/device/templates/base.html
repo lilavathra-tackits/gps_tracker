@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Device Dashboard{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+        .minidock-tooltip {
+            visibility: hidden;
+            position: absolute;
+            right: 100%;
+            margin-right: 8px;
+            background-color: #1F2937; /* Tailwind gray-800 */
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .minidock-item:hover .minidock-tooltip {
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Toast Container -->
+    <div class="fixed top-4 right-4 z-50 space-y-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast relative flex items-start gap-3 w-96 max-w-full p-4 rounded-xl shadow-lg border-l-4 animate-fade-in 
+                            {% if 'success' in message.tags %}border-green-500 bg-green-50{% elif 'error' in message.tags %}border-red-500 bg-red-50{% elif 'warning' in message.tags %}border-yellow-500 bg-yellow-50{% else %}border-blue-500 bg-blue-50{% endif %}"
+                     role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="mt-0.5 text-xl">
+                        {% if 'success' in message.tags %}
+                            <i class="fas fa-check-circle text-green-500"></i>
+                        {% elif 'error' in message.tags %}
+                            <i class="fas fa-times-circle text-red-500"></i>
+                        {% elif 'warning' in message.tags %}
+                            <i class="fas fa-exclamation-circle text-yellow-500"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-sm 
+                                    {% if 'success' in message.tags %}text-green-700{% elif 'error' in message.tags %}text-red-700{% elif 'warning' in message.tags %}text-yellow-700{% else %}text-blue-700{% endif %}">
+                            {% if 'success' in message.tags %}
+                                Success
+                            {% elif 'error' in message.tags %}
+                                Error
+                            {% elif 'warning' in message.tags %}
+                                Warning
+                            {% else %}
+                                Info
+                            {% endif %}
+                        </h3>
+                        <p class="text-gray-700 text-sm mt-1">
+                            {{ message }}
+                        </p>
+                    </div>
+                    <button type="button" class="toast-close text-gray-400 hover:text-gray-600 text-lg">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Mobile nav toggle -->
+    <div class="md:hidden bg-blue-900 text-white flex justify-between items-center p-4">
+        <h2 class="text-xl font-bold">Device Dashboard</h2>
+        <button id="menu-toggle" class="focus:outline-none">
+            <i class="bi bi-list text-2xl"></i>
+        </button>
+    </div>
+
+    <div class="flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-full md:w-56 bg-blue-900 text-white p-4 md:block hidden">
+            <h2 class="text-xl font-bold mb-6">Navigation</h2>
+            <ul>
+                <li class="mb-3">
+                    <a href="{% url 'dashboard' %}" 
+                       class="flex items-center gap-2 px-3 py-2 {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-md transition-colors">
+                        <i class="bi bi-speedometer2"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a href="{% url 'device_list' %}"
+                       class="flex items-center gap-2 px-3 py-2 {% if request.resolver_match.url_name == 'device_list' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-md transition-colors">
+                        <i class="bi bi-ui-checks-grid"></i>
+                        Devices
+                    </a>
+                </li>
+                {% if device %}
+                <li class="mb-3">
+                    <a href="{% url 'device_history' device_id=device.device_id %}"
+                       class="flex items-center gap-2 px-3 py-2 {% if request.resolver_match.url_name == 'device_history' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-md transition-colors">
+                        <i class="bi bi-map"></i>
+                        Travel History
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a href="{% url 'device_data' device_id=device.device_id %}"
+                       class="flex items-center gap-2 px-3 py-2 {% if request.resolver_match.url_name == 'device_data' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-md transition-colors">
+                        <i class="bi bi-cpu"></i>
+                        Device Data
+                    </a>
+                </li>
+                {% endif %}
+                <li class="mb-3">
+                    <a href="{% url 'notifications' %}" 
+                       class="flex items-center gap-2 px-3 py-2 {% if request.resolver_match.url_name == 'notifications' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-md transition-colors">
+                        <i class="bi bi-bell"></i>
+                        Notifications
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a href="{% url 'user_settings' %}" 
+                       class="flex items-center gap-2 px-3 py-2 {% if request.resolver_match.url_name == 'user_settings' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-md transition-colors">
+                        <i class="bi bi-gear"></i>
+                        Settings
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a href="{% url 'logout' %}"
+                       class="flex items-center gap-2 px-3 py-2 hover:bg-red-700 rounded-md transition-colors">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 p-6 md:pr-16"> <!-- Added md:pr-16 to avoid overlap with mini dock -->
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <!-- Right-side Mini Dock -->
+        <aside class="fixed right-0 top-1/4 w-12 bg-blue-800 text-white p-2 rounded-l-md shadow-lg md:block hidden z-40">
+            <ul class="flex flex-col gap-4">
+                <li class="minidock-item relative">
+                    <a href="{% url 'dashboard' %}" class="flex items-center justify-center p-2 hover:bg-blue-700 rounded-md transition-colors" aria-label="Homepage">
+                        <i class="bi bi-house text-xl"></i>
+                        <span class="minidock-tooltip">Homepage</span>
+                    </a>
+                </li>
+                <li class="minidock-item relative">
+                    <a href="{% url 'device_list' %}" class="flex items-center justify-center p-2 hover:bg-blue-700 rounded-md transition-colors" aria-label="Devices">
+                        <i class="bi bi-ui-checks-grid text-xl"></i>
+                        <span class="minidock-tooltip">Devices</span>
+                    </a>
+                </li>
+                <li class="minidock-item relative">
+                    <a href="{% url 'user_settings' %}" class="flex items-center justify-center p-2 hover:bg-blue-700 rounded-md transition-colors" aria-label="Settings">
+                        <i class="bi bi-gear text-xl"></i>
+                        <span class="minidock-tooltip">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+    </div>
+
+    {% block extra_scripts %}
+    {% endblock %}
+
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function () {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Toast functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.remove('opacity-0');
+                    toast.classList.add('opacity-100');
+                }, 100);
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100');
+                    toast.classList.add('opacity-0');
+                    setTimeout(() => toast.remove(), 600);
+                }, 2000);
+                const closeButton = toast.querySelector('.toast-close');
+                if (closeButton) {
+                    closeButton.addEventListener('click', () => {
+                        toast.classList.remove('opacity-100');
+                        toast.classList.add('opacity-0');
+                        setTimeout(() => toast.remove(), 300);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

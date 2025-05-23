@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Device Travel History - {{ device.device_id }}{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-700">Travel History for Device: {{ device.device_id }}</h1>
+<p class="text-gray-500 mt-1">View the device's travel path over selected time periods</p>
+
+<div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+    <div class="flex items-center gap-4 mb-4">
+        <label for="timeFilter" class="text-lg font-semibold">Select Time Range:</label>
+        <select id="timeFilter" class="border rounded-md p-2">
+            <option value="1">Last 1 Hour</option>
+            <option value="10">Last 10 Hours</option>
+            <option value="24" selected>Last 1 Day</option>
+            <option value="168">Last 1 Week</option>
+        </select>
+        <p class="text-gray-500 italic hidden" id="loading">Loading data...</p>
+        <p class="text-red-600 font-bold hidden" id="error"></p>
+    </div>
+
+    <div id="map" class="h-[500px] w-full rounded-lg"></div>
+    <div class="mt-4">
+        <p class="text-gray-600">Total Distance: <span id="totalDistance">0</span> meters</p>
+        <p class="text-gray-600">Data Points: <span id="dataPoints">0</span></p>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    // Initialize Leaflet Map
+    const map = L.map('map').setView([13.0827, 80.2707], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+    let polyline = L.polyline([], { color: '#3B82F6', weight: 5 }).addTo(map);
+    let marker = L.marker([13.0827, 80.2707]).addTo(map);
+
+    map.on('tileerror', function(error, tile) {
+        console.warn('Tile loading error:', error, tile);
+        $('#error').text('Error loading map tiles.').show();
+    });
+
+    // Fetch and display travel history
+    function fetchTravelHistory(hours) {
+        const historyUrl = "{% url 'device_history_data' device_id=device.device_id %}";
+        const timeThreshold = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+        const errorDiv = $('#error');
+        const loadingDiv = $('#loading');
+        const totalDistanceSpan = $('#totalDistance');
+        const dataPointsSpan = $('#dataPoints');
+
+        $.ajax({
+            url: historyUrl,
+            method: 'GET',
+            data: { time_threshold: timeThreshold },
+            dataType: 'json',
+            beforeSend: function() {
+                loadingDiv.show();
+                errorDiv.hide();
+                polyline.setLatLngs([]);
+                marker.setLatLng([13.0827, 80.2707]);
+            },
+            success: function(data) {
+                loadingDiv.hide();
+                if (data.error) {
+                    errorDiv.text(`Error: ${data.error}`).show();
+                    totalDistanceSpan.text('0');
+                    dataPointsSpan.text('0');
+                    return;
+                }
+                dataPointsSpan.text(data.count);
+                totalDistanceSpan.text((data.total_distance || 0).toFixed(2));
+                const points = data.data_points.map(point => [point.latitude, point.longitude]);
+                polyline.setLatLngs(points);
+                if (points.length > 0) {
+                    map.fitBounds(polyline.getBounds());
+                    marker.setLatLng(points[points.length - 1]);
+                } else {
+                    errorDiv.text('No valid coordinates available.').show();
+                }
+            },
+            error: function(xhr) {
+                loadingDiv.hide();
+                errorDiv.text(`Error: ${xhr.statusText || 'Failed to fetch data'}`).show();
+                totalDistanceSpan.text('0');
+                dataPointsSpan.text('0');
+            }
+        });
+    }
+
+    // Event listeners
+    $('#timeFilter').on('change', function() {
+        const hours = parseInt(this.value);
+        fetchTravelHistory(hours);
+    });
+
+    // Initial fetch for default time range (24 hours)
+    fetchTravelHistory(24);
+</script>
+{% endblock %}

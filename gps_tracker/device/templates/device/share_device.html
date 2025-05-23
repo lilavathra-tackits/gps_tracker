@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Share Device - {{ device.device_id }}{% endblock %}
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4">Share {{ device.device_id }}</h2>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="shared_with_id" class="block text-sm font-medium text-gray-700">User ID</label>
+            <input type="number" name="shared_with_id" id="shared_with_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="permission" class="block text-sm font-medium text-gray-700">Permission</label>
+            <select name="permission" id="permission" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="view">View</option>
+                <option value="edit">Edit</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <i class="bi bi-share"></i> Share Device
+        </button>
+    </form>
+    <a href="{% url 'device_list' %}" class="inline-block mt-4 text-blue-600 hover:underline">
+        <i class="bi bi-arrow-left"></i> Back to Devices
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Device List{% endblock %}
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4">Your Devices</h2>
+    <a href="{% url 'add_device' %}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4">
+        <i class="bi bi-plus-circle"></i> Add Device
+    </a>
+    <a href="{% url 'notifications' %}" class="inline-block bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mb-4 ml-2">
+        <i class="bi bi-bell"></i> Notifications
+    </a>
+    <a href="{% url 'user_settings' %}" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4 ml-2">
+        <i class="bi bi-gear"></i> Settings
+    </a>
+    {% if devices %}
+        <ul class="space-y-4">
+            {% for device in devices %}
+                <li class="border p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-semibold">{{ device.alias|default:device.device_id }}</h3>
+                            <p class="text-gray-600">ID: {{ device.device_id }}</p>
+                            <p class="text-gray-600">Created: {{ device.created_at|date:"Y-m-d H:i" }}</p>
+                            <p class="text-gray-600">Update Interval: {{ device.update_interval }} minutes</p>
+                        </div>
+                        <div class="space-x-2">
+                            <a href="{% url 'dashboard' device_id=device.device_id %}" class="text-blue-600 hover:underline">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                            <a href="{% url 'edit_device' device_id=device.device_id %}" class="text-yellow-600 hover:underline">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'share_device' device_id=device.device_id %}" class="text-green-600 hover:underline">
+                                <i class="bi bi-share"></i> Share
+                            </a>
+                        </div>
+                    </div>
+                    {% with shares=device.deviceshare_set.all %}
+                        {% if shares %}
+                            <div class="mt-2">
+                                <p class="text-sm font-semibold">Shared with ({{ shares.count }}):</p>
+                                <ul class="ml-4 space-y-1">
+                                    {% for share in shares %}
+                                        <li>
+                                            <span class="text-gray-600">{{ share.shared_with.username }} ({{ share.permission|title }})</span>
+                                            <a href="{% url 'modify_share' device_id=device.device_id share_id=share.id %}" class="text-purple-600 hover:underline ml-2">
+                                                <i class="bi bi-gear"></i> Manage
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-gray-600">No devices found.</p>
+    {% endif %}
+    {% if shared_devices %}
+        <h2 class="text-2xl font-bold mt-8 mb-4">Shared Devices</h2>
+        <ul class="space-y-4">
+            {% for share in shared_devices %}
+                <li class="border p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-semibold">{{ share.device.alias|default:share.device.device_id }}</h3>
+                            <p class="text-gray-600">ID: {{ share.device.device_id }}</p>
+                            <p class="text-gray-600">Permission: {{ share.permission|title }}</p>
+                        </div>
+                        <div class="space-x-2">
+                            <a href="{% url 'dashboard' device_id=share.device.device_id %}" class="text-blue-600 hover:underline">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                            {% if share.permission == 'edit' %}
+                            <a href="{% url 'share_edit_device' device_id=share.device.device_id %}" class="text-yellow-600 hover:underline">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

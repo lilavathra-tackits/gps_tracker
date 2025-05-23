@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Modify Share - {{ device.device_id }}{% endblock %}
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4">Modify Share for {{ device.device_id }}</h2>
+    <p class="mb-4">Shared with: {{ share.shared_with.username }} (Current Permission: {{ share.permission|title }})</p>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="permission" class="block text-sm font-medium text-gray-700">New Permission</label>
+            <select name="permission" id="permission" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="view" {% if share.permission == 'view' %}selected{% endif %}>View</option>
+                <option value="edit" {% if share.permission == 'edit' %}selected{% endif %}>Edit</option>
+            </select>
+        </div>
+        <div class="flex space-x-4">
+            <button type="submit" name="action" value="modify" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <i class="bi bi-pencil"></i> Update Permission
+            </button>
+            <button type="submit" name="action" value="delete" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                <i class="bi bi-trash"></i> Remove Share
+            </button>
+        </div>
+    </form>
+    <a href="{% url 'device_list' %}" class="inline-block mt-4 text-blue-600 hover:underline">
+        <i class="bi bi-arrow-left"></i> Back to Devices
+    </a>
+</div>
+{% endblock %}
