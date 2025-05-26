@@ -4,34 +4,34 @@
 <div class="container mx-auto p-6">
   <!-- Device Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-    <div class="bg-gradient-to-r from-amber-400 to-amber-500 p-6 rounded-xl shadow-lg text-white">
+    <div class="bg-gradient-to-r from-blue-400 to-blue-500 p-6 rounded-xl shadow-lg text-white">
       <h3 class="text-lg font-semibold">Total Devices Linked</h3>
       <p class="text-3xl font-bold mt-2">{{ total_devices }}</p>
     </div>
-    <div class="bg-gradient-to-r from-lime-400 to-lime-500 p-6 rounded-xl shadow-lg text-white">
+    <div class="bg-gradient-to-r from-green-400 to-green-500 p-6 rounded-xl shadow-lg text-white">
       <h3 class="text-lg font-semibold">Active Devices</h3>
       <p class="text-3xl font-bold mt-2">{{ active_devices }}</p>
     </div>
   </div>
 
   <!-- Device Cards -->
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Your Devices</h2>
+  <h2 class="text-2xl font-bold mb-4 text-gray-700 dark:text-gray-200">Your Devices</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
     {% for item in all_devices %}
-      <div class="bg-gradient-to-r from-violet-400 to-violet-500 p-6 rounded-xl shadow-lg text-white">
+      <div class="bg-gradient-to-r from-indigo-400 to-indigo-500 p-6 rounded-xl shadow-lg text-white">
         <h3 class="text-lg font-semibold">{{ item.device.alias|default:item.device.device_id }}</h3>
         <p class="text-sm mt-2">Status: <span class="font-medium">{{ item.status }}</span></p>
         <p class="text-sm">{% if item.is_shared %}Shared{% else %}Owned{% endif %}</p>
-        <a href="{% url 'dashboard' device_id=item.device.device_id %}" class="mt-4 inline-block bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg">View Dashboard</a>
+        <a href="{% url 'dashboard' device_id=item.device.device_id %}" class="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">View Dashboard</a>
       </div>
     {% empty %}
-      <p class="text-gray-600 dark:text-gray-400">No devices linked. <a href="{% url 'add_device' %}" class="text-cyan-600 hover:text-cyan-500">Add a device</a>.</p>
+      <p class="text-gray-600 dark:text-gray-400">No devices linked. <a href="{% url 'add_device' %}" class="text-blue-600 hover:underline">Add a device</a>.</p>
     {% endfor %}
   </div>
 
   <!-- Tutorial Section -->
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">How to Use Your GPS Tracker</h2>
-  <div class="bg-gradient-to-r from-rose-400 to-rose-500 p-6 rounded-xl shadow-lg text-white mb-8">
+  <h2 class="text-2xl font-bold mb-4 text-gray-700 dark:text-gray-200">How to Use Your GPS Tracker</h2>
+  <div class="bg-gradient-to-r from-teal-400 to-teal-500 p-6 rounded-xl shadow-lg text-white mb-8">
     <h3 class="text-lg font-semibold">Getting Started</h3>
     <ul class="list-disc list-inside text-sm mt-2 space-y-2">
       <li>Add a device using its ID and password in the Devices section.</li>
@@ -43,14 +43,14 @@
   </div>
 
   <!-- Subscription Section -->
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Device Subscriptions</h2>
+  <h2 class="text-2xl font-bold mb-4 text-gray-700 dark:text-gray-200">Device Subscriptions</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in all_devices %}
-      <div class="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 p-6 rounded-xl shadow-lg text-white">
+      <div class="bg-gradient-to-r from-purple-400 to-purple-500 p-6 rounded-xl shadow-lg text-white">
         <h3 class="text-lg font-semibold">{{ item.device.alias|default:item.device.device_id }}</h3>
         <p class="text-sm mt-2">Subscription Status: <span class="font-medium">Pending Setup</span></p>
         <p class="text-sm">Manage your subscription plan for this device.</p>
-        <a href="#" class="mt-4 inline-block bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg">Manage Subscription (Coming Soon)</a>
+        <a href="#" class="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">Manage Subscription (Coming Soon)</a>
       </div>
     {% empty %}
       <p class="text-gray-600 dark:text-gray-400">No devices to manage subscriptions for.</p>

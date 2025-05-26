@@ -96,5 +96,127 @@
 
     // Initial fetch for default time range (24 hours)
     fetchTravelHistory(24);
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Theme Toggle
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIcon = document.getElementById('theme-icon');
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      if (themeIcon) {
+        if (currentTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+          themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+        if (themeToggle) {
+          themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            if (document.documentElement.classList.contains('dark')) {
+              localStorage.setItem('theme', 'dark');
+              themeIcon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+              localStorage.setItem('theme', 'light');
+              themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+            console.log('Theme toggled:', document.documentElement.classList.contains('dark') ? 'Dark' : 'Light');
+          });
+        } else {
+          console.error('Theme toggle element not found');
+        }
+      } else {
+        console.error('Theme icon element not found');
+      }
+
+      // Sidebar Toggle
+      const menuToggle = document.getElementById('menu-toggle');
+      const sidebar = document.getElementById('sidebar');
+      if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+          sidebar.classList.toggle('sidebar-hidden');
+          console.log('Sidebar toggled:', sidebar.classList.contains('sidebar-hidden') ? 'Closed' : 'Open');
+        });
+      } else {
+        console.error('Sidebar toggle elements not found:', { menuToggle, sidebar });
+      }
+
+      // Ensure sidebar is visible on desktop
+      if (window.innerWidth >= 768) {
+        sidebar.classList.remove('sidebar-hidden');
+      }
+
+      // Notification Toggle and Mark as Read
+      const notificationToggle = document.getElementById('notification-toggle');
+      const notificationDropdown = document.getElementById('notification-dropdown');
+      const notificationBadge = document.getElementById('notification-badge');
+      const notificationCount = {{ notifications|length|default:0 }};
+      if (notificationBadge) {
+        notificationBadge.textContent = Math.min(notificationCount, 5);
+        notificationBadge.style.display = notificationCount > 0 ? 'flex' : 'none';
+      } else {
+        console.error('Notification badge element not found');
+      }
+      if (notificationToggle && notificationDropdown) {
+        notificationToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          notificationDropdown.classList.toggle('active');
+          console.log('Notification dropdown toggled:', notificationDropdown.classList.contains('active') ? 'Open' : 'Closed');
+        });
+        document.addEventListener('click', (e) => {
+          if (!notificationToggle.contains(e.target) && !notificationDropdown.contains(e.target)) {
+            notificationDropdown.classList.remove('active');
+          }
+        });
+      } else {
+        console.error('Notification toggle elements not found:', { notificationToggle, notificationDropdown });
+      }
+
+      // Mark notification as read
+      const notificationItems = document.querySelectorAll('.notification-item');
+      notificationItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const notificationId = item.getAttribute('data-id');
+          $.ajax({
+            url: `/devices/notifications/${notificationId}/mark-read/`,
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: () => {
+              item.classList.add('opacity-50');
+              let badgeCount = parseInt(notificationBadge.textContent) - 1;
+              notificationBadge.textContent = Math.max(badgeCount, 0);
+              notificationBadge.style.display = badgeCount > 0 ? 'flex' : 'none';
+            },
+            error: (xhr) => {
+              console.error('Failed to mark notification as read:', xhr.responseText);
+            }
+          });
+        });
+      });
+
+      // Toast Behavior
+      const toasts = document.querySelectorAll('.toast');
+      toasts.forEach(toast => {
+        setTimeout(() => toast.classList.add('opacity-100'), 100);
+        setTimeout(() => {
+          toast.classList.remove('opacity-100');
+          setTimeout(() => toast.remove(), 500);
+        }, 3000);
+        toast.querySelector('.toast-close')?.addEventListener('click', () => {
+          toast.classList.remove('opacity-100');
+          setTimeout(() => toast.remove(), 300);
+        });
+      });
+    });
+
+    function toggleMenu(id) {
+      const menu = document.getElementById(id);
+      if (menu) {
+        menu.classList.toggle('hidden');
+        console.log(`Menu ${id} toggled:`, menu.classList.contains('hidden') ? 'Closed' : 'Open');
+      } else {
+        console.error(`Menu element not found for ID: ${id}`);
+      }
+    }
+
 </script>
 {% endblock %}

@@ -1,54 +1,53 @@
-{% extends 'base.html' %}
-{% block title %} Notifications and Alerts {% endblock %}
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
 {% block content %}
-<div class="bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-4"> Notifications and Alerts </h2>
-    <form method="get" class="mb-6 space-y-4">
-        <div>
-            <label for="device_id" class="block text-sm font-medium text-gray-700"> Filter by Device </label>
-            <select name="device_id" id="device_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value=""> All Devices </option>
-                {% for device in devices %}
-                    <option value="{{ device.device_id }}" {% if device.device_id == selected_device_id %}selected{% endif %}>{{ device.alias|default:device.device_id }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <label for="time_threshold" class="block text-sm font-medium text-gray-700"> Filter by Start Time </label>
-            <input type="datetime-local" name="time_threshold" id="time_threshold" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-        </div>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            <i class="bi bi-filter"></i> Apply Filters
-        </button>
+<div class="container mx-auto p-6">
+  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Notifications</h2>
+  <div class="mb-4">
+    <form method="get" class="flex gap-4">
+      <select name="device_id" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+        <option value="">All Devices</option>
+        {% for device in devices %}
+          <option value="{{ device.device_id }}" {% if selected_device_id == device.device_id %}selected{% endif %}>
+            {{ device.alias|default:device.device_id }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg">Filter</button>
     </form>
-    <h3 class="text-lg font-semibold mb-2"> Notifications </h3>
-    {% if notifications %}
-        <ul class="space-y-2 mb-6">
-            {% for notification in notifications %}
-                <li class="border p-2 rounded {% if not notification.read %}bg-yellow-100{% endif %}">
-                    <p>{{ notification.message }}</p>
-                    <p class="text-sm text-gray-600"> Device: {{ notification.device.alias|default:notification.device.device_id }} ({{ notification.device.device_id }}) | Time: {{ notification.timestamp|date:"Y-m-d H:i" }}</p>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p class="text-gray-600 mb-6"> No notifications found. </p>
-    {% endif %}
-    <h3 class="text-lg font-semibold mb-2"> Speed Alerts </h3>
-    {% if speed_alerts %}
-        <ul class="space-y-2">
-            {% for alert in speed_alerts %}
-                <li class="border p-2 rounded">
-                    <p>{{ alert.message }}</p>
-                    <p class="text-sm text-gray-600"> Device: {{ alert.device.alias|default:alert.device.device_id }} ({{ alert.device.device_id }}) | Speed: {{ alert.speed }} km/h | Time: {{ alert.timestamp|date:"Y-m-d H:i" }}</p>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p class="text-gray-600"> No speed alerts found. </p>
-    {% endif %}
-    <a href="{% url 'device_list' %}" class=" inline-block mt-4 text-blue-600 hover:underline ">
-        <i class="bi bi-arrow-left"></i> Back to Devices
-    </a>
+  </div>
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Recent Notifications</h3>
+    <ul class="space-y-4">
+      {% for notification in notifications %}
+        <li class="border-b border-gray-200 dark:border-gray-700 pb-2 {% if notification.read %}opacity-50{% endif %}">
+          <p>{{ notification.message }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Device: {{ notification.device.alias|default:notification.device.device_id }} | 
+            {{ notification.timestamp|date:"Y-m-d H:i" }}
+          </p>
+        </li>
+      {% empty %}
+        <li class="text-gray-600 dark:text-gray-400">No notifications found.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="mt-6 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Speed Alerts</h3>
+    <ul class="space-y-4">
+      {% for alert in speed_alerts %}
+        <li class="border-b border-gray-200 dark:border-gray-700 pb-2">
+          <p>{{ alert.message }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Device: {{ alert.device.alias|default:alert.device.device_id }} | 
+            Speed: {{ alert.speed }} km/h | 
+            {{ alert.timestamp|date:"Y-m-d H:i" }}
+          </p>
+        </li>
+      {% empty %}
+        <li class="text-gray-600 dark:text-gray-400">No speed alerts found.</li>
+      {% endfor %}
+    </ul>
+  </div>
 </div>
 {% endblock %}

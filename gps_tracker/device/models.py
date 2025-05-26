@@ -49,7 +49,7 @@ class SpeedAlert(models.Model):
 class DeviceShare(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     shared_with = models.ForeignKey(User, on_delete=models.CASCADE)
-    permission = models.CharField(max_length=20, choices=[('view', 'View'), ('edit', 'Edit')], default='view')
+    permission = models.CharField(max_length=20, default='view') 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

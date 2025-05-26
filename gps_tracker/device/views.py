@@ -16,11 +16,53 @@ from django.contrib.auth import update_session_auth_hash
 
 
 @login_required
+def home(request):
+    # Devices linked and active
+    devices = Device.objects.filter(user=request.user)
+    shared_devices = DeviceShare.objects.filter(shared_with=request.user)
+    total_devices = devices.count() + shared_devices.count()
+    
+    # Active devices: Devices with data in the last 10 minutes
+    ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+    active_devices = Device.objects.filter(
+        devicedata__timestamp__gte=ten_minutes_ago
+    ).filter(user=request.user).distinct().count() + DeviceShare.objects.filter(
+        shared_with=request.user,
+        device__devicedata__timestamp__gte=ten_minutes_ago
+    ).distinct().count()
+    
+    # All notifications for the user (across all devices)
+    notifications = Notification.objects.filter(user=request.user).order_by('-timestamp')[:10]
+    
+    # Combine owned and shared devices for display
+    all_devices = []
+    for device in devices:
+        latest_data = DeviceData.objects.filter(device=device).order_by('-timestamp').first()
+        all_devices.append({
+            'device': device,
+            'is_shared': False,
+            'status': 'Active' if latest_data and (timezone.now() - latest_data.timestamp).total_seconds() / 60 < 10 else 'Inactive',
+        })
+    for share in shared_devices:
+        latest_data = DeviceData.objects.filter(device=share.device).order_by('-timestamp').first()
+        all_devices.append({
+            'device': share.device,
+            'is_shared': True,
+            'status': 'Active' if latest_data and (timezone.now() - latest_data.timestamp).total_seconds() / 60 < 10 else 'Inactive',
+        })
+    
+    return render(request, 'device/home.html', {
+        'total_devices': total_devices,
+        'active_devices': active_devices,
+        'all_devices': all_devices,
+        'notifications': notifications,
+    })
+
+@login_required
 def device_list(request):
     devices = Device.objects.filter(user=request.user)
     shared_devices = DeviceShare.objects.filter(shared_with=request.user)
     return render(request, 'device/device_list.html', {'devices': devices, 'shared_devices': shared_devices})
-
 
 @login_required
 def add_device(request):
@@ -32,11 +74,11 @@ def add_device(request):
         
         if not device_id or not device_password:
             messages.error(request, 'Device ID and password are required.')
-            return render(request, 'add_device.html')
+            return render(request, 'device/add_device.html')
         
         if Device.objects.filter(device_id=device_id).exists():
             messages.error(request, 'Device ID already exists.')
-            return render(request, 'add_device.html')
+            return render(request, 'device/add_device.html')
         
         try:
             update_interval = int(update_interval)
@@ -44,8 +86,7 @@ def add_device(request):
                 raise ValueError
         except ValueError:
             messages.error(request, 'Invalid update interval.')
-            return render(request, 'add_device.html')
-        
+            return render(request, 'device/add_device.html')
         
         Device.objects.create(
             device_id=device_id,
@@ -57,7 +98,7 @@ def add_device(request):
         messages.success(request, f"Device '{alias or device_id}' added successfully.")
         return redirect('device_list')
     
-    return render(request, 'add_device.html')
+    return render(request, 'device/add_device.html')
 
 @login_required
 def device_login(request, device_id):
@@ -129,7 +170,7 @@ def save_device_data(request, device_id):
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
     try:
         device = Device.objects.get(device_id=device_id)
-        if device.user != request.user and not DeviceShare.objects.filter(device=device, shared_with=request.user, permission='edit').exists() and not request.user.is_admin:
+        if device.user != request.user and not DeviceShare.objects.filter(device=device, shared_with=request.user).exists():
             return JsonResponse({"status": "error", "message": "Unauthorized"}, status=403)
         data = json.loads(request.body)
         required_fields = ['location', 'charge', 'timestamp', 'power_source']
@@ -153,7 +194,7 @@ def save_device_data(request, device_id):
                     time_diff = (parsed_timestamp - latest_data.timestamp).total_seconds() / 60
                     if time_diff < device.update_interval:
                         return JsonResponse({"status": "error", "message": "Update interval not reached"}, status=429)
-            device_data = process_device_data(
+            device_data = DeviceData.objects.create(
                 device=device,
                 latitude=latitude,
                 longitude=longitude,
@@ -295,22 +336,22 @@ def share_device(request, device_id):
     try:
         device = Device.objects.get(device_id=device_id, user=request.user)
         if request.method == 'POST':
-            shared_with_id = request.POST.get('shared_with_id')
-            permission = request.POST.get('permission', 'view')
+            email = request.POST.get('email')
             if DeviceShare.objects.filter(device=device).count() >= 3:
                 messages.error(request, "Maximum 3 users can be shared with.")
-                return redirect('device_list')
+                return render(request, 'device/share_device.html', {'device': device})
             try:
-                shared_with = User.objects.get(id=shared_with_id)
+                shared_with = User.objects.get(email=email)
                 DeviceShare.objects.create(
                     device=device,
                     shared_with=shared_with,
-                    permission=permission
+                    permission='view'  # Only view permission
                 )
                 messages.success(request, f"Device shared with {shared_with.username}.")
+                return redirect('device_list')
             except User.DoesNotExist:
-                messages.error(request, "User not found.")
-            return redirect('device_list')
+                messages.error(request, "No user found with this email.")
+                return render(request, 'device/share_device.html', {'device': device})
         return render(request, 'device/share_device.html', {'device': device})
     except Device.DoesNotExist:
         messages.error(request, "Device not found.")
@@ -326,19 +367,12 @@ def modify_share(request, device_id, share_id):
             if action == 'delete':
                 share.delete()
                 messages.success(request, "Share removed.")
-            elif action == 'modify':
-                permission = request.POST.get('permission', 'view')
-                share.permission = permission
-                share.save()
-                messages.success(request, "Share permissions updated.")
             return redirect('device_list')
         return render(request, 'device/modify_share.html', {'device': device, 'share': share})
     except (Device.DoesNotExist, DeviceShare.DoesNotExist):
         messages.error(request, "Device or share not found.")
         return redirect('device_list')
 
-
-# Need to Fix 
 @login_required
 def maintenance_status(request, device_id):
     try:
@@ -357,8 +391,7 @@ def maintenance_status(request, device_id):
     except Device.DoesNotExist:
         messages.error(request, "Device not found.")
         return redirect('device_list')
-    
-    
+
 @login_required
 def edit_device(request, device_id):
     try:
@@ -400,50 +433,6 @@ def edit_device(request, device_id):
         return redirect('device_list')
 
 @login_required
-def share_edit_device(request, device_id):
-    try:
-        device = Device.objects.get(device_id=device_id)
-        if device.user != request.user and not DeviceShare.objects.filter(device=device, shared_with=request.user, permission='edit').exists():
-            messages.error(request, 'You do not have permission to edit this device.')
-            return redirect('device_list')
-        
-        if request.method == 'POST':
-            new_device_id = request.POST.get('device_id')
-            alias = request.POST.get('alias')
-            device_password = request.POST.get('device_password')
-            update_interval = request.POST.get('update_interval', device.update_interval)
-            
-            if not new_device_id:
-                messages.error(request, 'Device ID is required.')
-                return render(request, 'device/share_edit_device.html', {'device': device})
-            
-            if new_device_id != device.device_id and Device.objects.filter(device_id=new_device_id).exists():
-                messages.error(request, 'Device ID already exists.')
-                return render(request, 'device/share_edit_device.html', {'device': device})
-            
-            try:
-                update_interval = int(update_interval)
-                if update_interval < 1:
-                    raise ValueError
-            except ValueError:
-                messages.error(request, 'Invalid update interval.')
-                return render(request, 'device/share_edit_device.html', {'device': device})
-            
-            device.device_id = new_device_id
-            device.alias = alias if alias else None
-            if device_password:
-                device.device_password = device_password
-            device.update_interval = update_interval
-            device.save()
-            messages.success(request, f"Device '{device.alias or device.device_id}' updated successfully.")
-            return redirect('device_list')
-        
-        return render(request, 'device/share_edit_device.html', {'device': device})
-    except Device.DoesNotExist:
-        messages.error(request, 'Device not found.')
-        return redirect('device_list')
-
-@login_required
 def notifications(request):
     device_id = request.GET.get('device_id')
     time_threshold = request.GET.get('time_threshold')
@@ -481,6 +470,18 @@ def notifications(request):
         'devices': devices,
         'selected_device_id': device_id
     })
+
+@login_required
+def mark_notification_read(request, notification_id):
+    if request.method == 'POST':
+        try:
+            notification = Notification.objects.get(id=notification_id, user=request.user)
+            notification.read = True
+            notification.save()
+            return JsonResponse({"status": "success"})
+        except Notification.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Notification not found"}, status=404)
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
 @login_required
 def user_settings(request):
