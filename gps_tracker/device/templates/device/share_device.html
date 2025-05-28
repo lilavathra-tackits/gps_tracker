@@ -2,14 +2,33 @@
 {% block title %}Share Device - {{ device.device_id }}{% endblock %}
 {% block content %}
 <div class="container mx-auto p-6">
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Share Device: {{ device.alias|default:device.device_id }}</h2>
-  <form method="post" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-md">
-    {% csrf_token %}
-    <div class="mb-4">
-      <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Share with Email</label>
-      <input type="email" name="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:bg-gray-700 dark:text-white" required>
-    </div>
-    <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg">Share</button>
-  </form>
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">Share Device: {{ device.alias|default:device.device_id }}</h2>
+
+  <!-- Share Device Form -->
+  <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border max-w-md">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      <!-- Email -->
+      <div class="flex items-center gap-4">
+        <div class="flex-1">
+          <label for="email" class="block text-sm font-medium text-gray-700">Share with Email</label>
+          <input type="email" name="email" id="email" class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80" required>
+        </div>
+      </div>
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button type="submit" class="bg-[#13af80] text-white py-2 px-4 rounded-lg hover:bg-[#0f8c62] transition duration-300">
+          <i class="bi bi-share me-1"></i> Share
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Back to Devices Link -->
+  <div class="mt-6">
+    <a href="{% url 'device_list' %}" class="inline-block text-[#13af80] hover:text-[#0f8c62] transition duration-300">
+      <i class="bi bi-arrow-left me-1"></i> Back to Devices
+    </a>
+  </div>
 </div>
 {% endblock %}

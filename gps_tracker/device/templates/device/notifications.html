@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Notifications{% endblock %}
 {% block content %}
-<div class="container mx-auto p-6">
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Notifications</h2>
-  <div class="mb-4">
-    <form method="get" class="flex gap-4">
-      <select name="device_id" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+<div class="container mx-auto p-6 animate__animated animate__fadeIn">
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">Notifications</h2>
+
+  <!-- Filter Form -->
+  <div class="mb-8">
+    <form method="get" class="flex gap-4 items-center">
+      <select name="device_id" class="w-full max-w-xs p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         <option value="">All Devices</option>
         {% for device in devices %}
           <option value="{{ device.device_id }}" {% if selected_device_id == device.device_id %}selected{% endif %}>
@@ -13,41 +15,189 @@
           </option>
         {% endfor %}
       </select>
-      <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg">Filter</button>
+      <button type="submit" class="bg-[#13af80] hover:bg-[#0f8c62] text-white py-2 px-4 rounded-lg transition duration-300">
+        Filter
+      </button>
     </form>
   </div>
-  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Recent Notifications</h3>
+
+  <!-- Tabs -->
+  <div class="mb-6">
+    <div class="flex border-b border-gray-300">
+      <button class="tab-button px-4 py-2 font-semibold text-gray-700 border-b-2 border-transparent hover:border-[#13af80] transition-colors active-tab" data-tab="all">
+        All
+      </button>
+      <button class="tab-button px-4 py-2 font-semibold text-gray-700 border-b-2 border-transparent hover:border-[#13af80] transition-colors" data-tab="notifications">
+        Recent Notifications
+      </button>
+      <button class="tab-button px-4 py-2 font-semibold text-gray-700 border-b-2 border-transparent hover:border-[#13af80] transition-colors" data-tab="speed-alerts">
+        Speed Alerts
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <!-- All Tab -->
+  <div id="all-tab" class="tab-content bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border animate__animated animate__fadeIn">
+    <h3 class="text-lg font-semibold text-[#192a2d] mb-4 flex items-center gap-2">
+      <i class="fas fa-list text-[#13af80]"></i> All Items
+    </h3>
     <ul class="space-y-4">
-      {% for notification in notifications %}
-        <li class="border-b border-gray-200 dark:border-gray-700 pb-2 {% if notification.read %}opacity-50{% endif %}">
-          <p>{{ notification.message }}</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            Device: {{ notification.device.alias|default:notification.device.device_id }} | 
-            {{ notification.timestamp|date:"Y-m-d H:i" }}
-          </p>
+      {% for item in all_items %}
+        <li class="border-b border-gray-300 pb-2 {% if item.type == 'notification' and item.read %}opacity-50{% endif %} flex justify-between items-center">
+          <div>
+            <p class="text-gray-700">
+              {% if item.type == 'notification' %}
+                <i class="fas fa-bell text-[#13af80] mr-2"></i>
+              {% else %}
+                <i class="fas fa-tachometer-alt text-[#13af80] mr-2"></i>
+              {% endif %}
+              {{ item.message }}
+            </p>
+            <p class="text-sm text-gray-500">
+              Device: {{ item.device.alias|default:item.device.device_id }} | 
+              {% if item.type == 'speed_alert' %}
+                Speed: {{ item.speed }} km/h | 
+              {% endif %}
+              {{ item.timestamp|date:"Y-m-d H:i" }}
+            </p>
+          </div>
+          {% if item.type == 'notification' and not item.read %}
+            <button class="mark-read-btn bg-[#13af80] hover:bg-[#0f8c62] text-white text-xs py-1 px-2 rounded-md transition duration-300" data-id="{{ item.id }}">
+              Mark as Read
+            </button>
+          {% endif %}
         </li>
       {% empty %}
-        <li class="text-gray-600 dark:text-gray-400">No notifications found.</li>
+        <li class="text-gray-600">No items found.</li>
       {% endfor %}
     </ul>
   </div>
-  <div class="mt-6 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Speed Alerts</h3>
+
+  <!-- Recent Notifications Tab -->
+  <div id="notifications-tab" class="tab-content bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border hidden animate__animated animate__fadeIn">
+    <h3 class="text-lg font-semibold text-[#192a2d] mb-4 flex items-center gap-2">
+      <i class="fas fa-bell text-[#13af80]"></i> Recent Notifications
+    </h3>
     <ul class="space-y-4">
-      {% for alert in speed_alerts %}
-        <li class="border-b border-gray-200 dark:border-gray-700 pb-2">
-          <p>{{ alert.message }}</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            Device: {{ alert.device.alias|default:alert.device.device_id }} | 
-            Speed: {{ alert.speed }} km/h | 
-            {{ alert.timestamp|date:"Y-m-d H:i" }}
-          </p>
+      {% for notification in notifications %}
+        <li class="border-b border-gray-300 pb-2 {% if notification.read %}opacity-50{% endif %} flex justify-between items-center">
+          <div>
+            <p class="text-gray-700">{{ notification.message }}</p>
+            <p class="text-sm text-gray-500">
+              Device: {{ notification.device.alias|default:notification.device.device_id }} | 
+              {{ notification.timestamp|date:"Y-m-d H:i" }}
+            </p>
+          </div>
+          {% if not notification.read %}
+            <button class="mark-read-btn bg-[#13af80] hover:bg-[#0f8c62] text-white text-xs py-1 px-2 rounded-md transition duration-300" data-id="{{ notification.id }}">
+              Mark as Read
+            </button>
+          {% endif %}
         </li>
       {% empty %}
-        <li class="text-gray-600 dark:text-gray-400">No speed alerts found.</li>
+        <li class="text-gray-600">No notifications found.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Speed Alerts Tab -->
+  <div id="speed-alerts-tab" class="tab-content bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border hidden animate__animated animate__fadeIn">
+    <h3 class="text-lg font-semibold text-[#192a2d] mb-4 flex items-center gap-2">
+      <i class="fas fa-tachometer-alt text-[#13af80]"></i> Speed Alerts
+    </h3>
+    <ul class="space-y-4">
+      {% for alert in speed_alerts %}
+        <li class="border-b border-gray-300 pb-2 flex justify-between items-center">
+          <div>
+            <p class="text-gray-700">{{ alert.message }}</p>
+            <p class="text-sm text-gray-500">
+              Device: {{ alert.device.alias|default:alert.device.device_id }} | 
+              Speed: {{ alert.speed }} km/h | 
+              {{ alert.timestamp|date:"Y-m-d H:i" }}
+            </p>
+          </div>
+        </li>
+      {% empty %}
+        <li class="text-gray-600">No speed alerts found.</li>
       {% endfor %}
     </ul>
   </div>
 </div>
+
+<style>
+/* Ensure consistency with other pages */
+.container {
+  max-width: 1200px;
+}
+
+/* Adjust form elements for consistency */
+select, button {
+  height: 40px;
+}
+
+/* Add hover effect to list items */
+li:hover {
+  background-color: rgba(19, 175, 128, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+/* Tab styles */
+.tab-button.active-tab {
+  border-bottom-color: #13af80;
+  color: #13af80;
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Tab Functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active-tab'));
+      tabContents.forEach(content => content.classList.add('hidden'));
+
+      // Add active class to clicked button and show corresponding tab
+      button.classList.add('active-tab');
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+    });
+  });
+
+  // Mark as Read Functionality
+  const markReadButtons = document.querySelectorAll('.mark-read-btn');
+  markReadButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const notificationId = button.getAttribute('data-id');
+      fetch(`/devices/notifications/${notificationId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Update UI: Fade the notification and disable the button
+          const listItem = button.closest('li');
+          listItem.classList.add('opacity-50');
+          button.remove(); // Remove the button after marking as read
+        } else {
+          console.error('Failed to mark notification as read:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  });
+});
+</script>
 {% endblock %}

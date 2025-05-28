@@ -23,7 +23,7 @@ def user_register(request):
             user = User.objects.create_user(username=username, email=email, password=password)
             login(request, user)
             messages.success(request,"Account created successfully")
-            return redirect('device_list')
+            return redirect('login')
 
     return render(request, 'user/register.html')
 
@@ -36,7 +36,7 @@ def user_login(request):
         if user:
             login(request, user)
             messages.success(request, "Logged in successfully")
-            return redirect('device_list')
+            return redirect('home')
         else:
             messages.error(request, "Invalid credentials.")
 

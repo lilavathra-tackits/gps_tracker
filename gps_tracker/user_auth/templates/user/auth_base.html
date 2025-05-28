@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+
+        body {
+            font-family: 'system-ui', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: radial-gradient(circle at 30% 70%, #1a5e4b, #0d1e2d);
+            position: relative;
+            overflow: hidden;
+        }
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.2;
+            animation: float 15s infinite ease-in-out;
+        }
+        body::before {
+            width: 300px;
+            height: 300px;
+            background: #13af80;
+            top: -100px;
+            left: -100px;
+        }
+        body::after {
+            width: 200px;
+            height: 200px;
+            background: #0f8c62;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: 5s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        input:focus {
+            box-shadow: 0 0 8px rgba(19, 175, 128, 0.3);
+        }
+        .toast { 
+      background-color: #dde1e2 !important; 
+      z-index: 1800; 
+    }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <!-- Notifications Section -->
+  <div class="fixed top-20 right-6 space-y-4">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="toast animate-fade-in flex items-start gap-4 w-96 p-4 rounded-lg shadow-lg border-l-4
+            {% if 'success' in message.tags %}border-lime-500{% elif 'error' in message.tags %}border-red-500{% elif 'warning' in message.tags %}border-amber-500{% else %}border-[#13af80]{% endif %}">
+          <div class="text-2xl">
+            {% if 'success' in message.tags %}
+              <i class="fas fa-check-circle text-lime-600"></i>
+            {% elif 'error' in message.tags %}
+              <i class="fas fa-times-circle text-red-600"></i>
+            {% elif 'warning' in message.tags %}
+              <i class="fas fa-exclamation-circle text-amber-600"></i>
+            {% else %}
+              <i class="fas fa-info-circle text-[#13af80]"></i>
+            {% endif %}
+          </div>
+          <div class="flex-1">
+            <h3 class="font-bold text-sm uppercase tracking-wide
+                {% if 'success' in message.tags %}text-lime-700{% elif 'error' in message.tags %}text-red-700{% elif 'warning' in message.tags %}text-amber-700{% else %}text-[#13af80]{% endif %}">
+              {% if 'success' in message.tags %}Success{% elif 'error' in message.tags %}Error{% elif 'warning' in message.tags %}Warning{% else %}Info{% endif %}
+            </h3>
+            <p class="text-sm">{{ message }}</p>
+          </div>
+          <button class="toast-close text-xl text-gray-400 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+    <!-- Content Block for Auth Pages -->
+    {% block auth_content %}
+
+    {% endblock %}
+    {% block extra_scripts %}
+
+      <script>
+  document.addEventListener('DOMContentLoaded', () => { 
+      const toasts = document.querySelectorAll('.toast');
+      toasts.forEach(toast => {
+        setTimeout(() => toast.classList.add('opacity-100'), 100);
+        setTimeout(() => {
+          toast.classList.remove('opacity-100');
+          setTimeout(() => toast.remove(), 500);
+        }, 3000);
+        toast.querySelector('.toast-close')?.addEventListener('click', () => {
+          toast.classList.remove('opacity-100');
+          setTimeout(() => toast.remove(), 300);
+        });
+      });
+    });
+
+
+  </script>
+    {% endblock %}
+</body>
+</html>

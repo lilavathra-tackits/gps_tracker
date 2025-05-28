@@ -3,37 +3,82 @@
 {% block content %}
 <div class="container mx-auto p-6">
   <!-- Device Stats -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-    <div class="bg-gradient-to-r from-amber-400 to-amber-500 p-6 rounded-xl shadow-lg text-white">
-      <h3 class="text-lg font-semibold">Total Devices Linked</h3>
-      <p class="text-3xl font-bold mt-2">{{ total_devices }}</p>
+  {% comment %} <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 animate__animated animate__backInDown ">
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
+      <h3 class="text-lg font-semibold text-[#192a2d]">Total Devices Linked</h3>
+      <p class="text-3xl font-bold mt-2 text-gray-700">{{ total_devices }}</p>
     </div>
-    <div class="bg-gradient-to-r from-lime-400 to-lime-500 p-6 rounded-xl shadow-lg text-white">
-      <h3 class="text-lg font-semibold">Active Devices</h3>
-      <p class="text-3xl font-bold mt-2">{{ active_devices }}</p>
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
+      <h3 class="text-lg font-semibold text-[#192a2d]">Active Devices</h3>
+      <p class="text-3xl font-bold mt-2 text-gray-700">{{ active_devices }}</p>
+    </div>
+  </div> {% endcomment %}
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 animate__animated animate__fadeInDown">
+  <!-- Card 1: Total Devices Linked -->
+  <div class="relative z-10 p-6 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 shadow-xl hover:shadow-2xl transition duration-300  overflow-hidden">
+    <!-- Background Icon -->
+    <i class="bi bi-hdd-network-fill text-[100px] text-amber-400/20 absolute bottom-2 right-4 z-0"></i>
+
+    <div class="relative z-10">
+      <h3 class="text-xl font-semibold tracking-wide">Total Devices Linked</h3>
+      <p class="text-4xl font-extrabold mt-2">{{ total_devices }}</p>
     </div>
   </div>
 
+  <!-- Card 2: Active Devices -->
+  <div class="relative z-10 p-6 rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 shadow-xl hover:shadow-2xl transition duration-300 overflow-hidden">
+    <!-- Background Icon -->
+    <i class="bi bi-wifi text-[100px] text-indigo-400/20 absolute bottom-2 right-4 z-0"></i>
+
+    <div class="relative z-10">
+      <h3 class="text-xl font-semibold  tracking-wide">Active Devices</h3>
+      <p class="text-4xl font-extrabold mt-2 ">{{ active_devices }}</p>
+    </div>
+  </div>
+</div>
+
+
   <!-- Device Cards -->
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Your Devices</h2>
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">Your Devices</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
     {% for item in all_devices %}
-      <div class="bg-gradient-to-r from-violet-400 to-violet-500 p-6 rounded-xl shadow-lg text-white">
-        <h3 class="text-lg font-semibold">{{ item.device.alias|default:item.device.device_id }}</h3>
-        <p class="text-sm mt-2">Status: <span class="font-medium">{{ item.status }}</span></p>
-        <p class="text-sm">{% if item.is_shared %}Shared{% else %}Owned{% endif %}</p>
-        <a href="{% url 'dashboard' device_id=item.device.device_id %}" class="mt-4 inline-block bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg">View Dashboard</a>
+      <div class="device-card ">
+        <div class="inner">
+          <span class="pricing {% if item.is_shared %}shared-device{% endif %}">
+            <span>
+              {% if item.is_shared %}<i class="fa-solid fa-share"></i> Shared{% else %}<i class="fa-solid fa-lock"></i> Owned{% endif %}
+            </span>
+          </span>
+          <p class="title">{{ item.device.alias|default:item.device.device_id }}</p>
+          {% comment %} <p class="info">Status: <span class="font-medium">{{ item.status }}</span> <span class=" absolute w-4 h-4 bg-lime-500 rounded-full animate-pulse"></span></p> {% endcomment %}
+          
+          {% if item.status == "Active" %}
+          <p class="info">Status: <span class="font-medium bg-green-300 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse"><i class="bi bi-check-circle-fill"></i> {{ item.status }}</span></p>
+          {% elif item.status == "Inactive" %}
+          <p class="info">Status: <span class="font-medium bg-red-300 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse "><i class="bi bi-x-circle-fill"></i> {{ item.status }}</span></p>
+          {% endif %}
+
+              {% comment %} <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div> {% endcomment %}
+          <div class="action">
+            <a class="button" href="{% url 'dashboard' device_id=item.device.device_id %}">
+              {% comment %} <i class="fas fa-tachometer-alt"></i> {% endcomment %}
+              <i class="fas fa-map-marker-alt"></i>
+              View Dashboard
+            </a>
+          </div>
+        </div>
       </div>
     {% empty %}
-      <p class="text-gray-600 dark:text-gray-400">No devices linked. <a href="{% url 'add_device' %}" class="text-cyan-600 hover:text-cyan-500">Add a device</a>.</p>
+      <p class="text-gray-600">No devices linked. <a href="{% url 'add_device' %}" class="text-[#13af80] hover:text-[#0f8c62] transition duration-300">Add a device</a>.</p>
     {% endfor %}
   </div>
 
   <!-- Tutorial Section -->
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">How to Use Your GPS Tracker</h2>
-  <div class="bg-gradient-to-r from-rose-400 to-rose-500 p-6 rounded-xl shadow-lg text-white mb-8">
-    <h3 class="text-lg font-semibold">Getting Started</h3>
-    <ul class="list-disc list-inside text-sm mt-2 space-y-2">
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">How to Use Your GPS Tracker</h2>
+  <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border mb-8">
+    <h3 class="text-lg font-semibold text-[#192a2d]">Getting Started</h3>
+    <ul class="list-disc list-inside text-sm mt-2 space-y-2 text-gray-700">
       <li>Add a device using its ID and password in the Devices section.</li>
       <li>View real-time data like speed, location, and battery on the device dashboard.</li>
       <li>Share your device with others via email for view-only access.</li>
@@ -42,19 +87,342 @@
     </ul>
   </div>
 
-  <!-- Subscription Section -->
-  <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Device Subscriptions</h2>
+
+    <!-- Subscription Plans Section -->
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">Choose a Subscription Plan</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Standard Plan -->
+    <div class="subscription-card relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-16 h-16 z-50">
+        <div class="absolute transform -rotate-45 bg-gold text-center text-white font-medium py-1 left-[-35px] top-[32px] w-[170px] text-xs">
+          50% off
+        </div>
+      </div>
+      <div class="inner">
+        <span class="pricing">
+          <span><i class="fa-solid fa-star"></i> Standard</span>
+        </span>
+        <br>
+        <p class="title"> Standard Plan</p>
+        <p class="info"> ₹ 2000/ 365 days</p>
+        <ul class="features">
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Up to <strong> 6 devices</strong></span>
+          </li>
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Real-time <strong>tracking</strong></span>
+          </li>
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Basic support</span>
+          </li>
+        </ul>
+        <div class="action">
+          {% comment %} <a class="button" href="#">Choose Plan (Coming Soon)</a> {% endcomment %}
+          <a class="button" href="#">(Coming Soon)</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Plan -->
+    <div class="subscription-card relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-16 h-16 z-50">
+        <div class="absolute transform -rotate-45 bg-gold text-center text-white font-medium py-1 left-[-35px] top-[32px] w-[170px] text-xs">
+          Best Value
+        </div>
+      </div>
+      <div class="inner">
+        <span class="pricing">
+          <span><i class="fa-solid fa-crown"></i> Premium</span>
+        </span>
+        <br>
+        <p class="title">Premium Plan</p>
+        <p class="info">₹ 4000 / 365 days</p>
+        <ul class="features">
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Up to <strong>9 devices</strong></span>
+          </li>
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Multiple <strong>sharing</strong></span>
+          </li>
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Priority support</span>
+          </li>
+        </ul>
+        <div class="action">
+          {% comment %} <a class="button" href="#">Choose Plan(Coming Soon)</a> {% endcomment %}
+          <a class="button" href="#">(Coming Soon)</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enterprise Plan -->
+    <div class="subscription-card relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-16 h-16 z-50">
+        <div class="absolute transform -rotate-45 bg-gold text-center text-white font-medium py-1 left-[-35px] top-[32px] w-[170px] text-xs">
+          For Teams
+        </div>
+      </div>
+      <div class="inner">
+        <span class="pricing">
+          <span><i class="fa-solid fa-briefcase"></i> Enterprise</span>
+        </span>
+        <br>
+        <p class="title">Enterprise Plan</p>
+        <p class="info"> ₹ 8000 / 365 days</p>
+        <ul class="features">
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span><strong>Unlimited</strong> devices</span>
+          </li>
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Advanced <strong>features</strong></span>
+          </li>
+          <li>
+            <span class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path fill="currentColor" d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"></path>
+              </svg>
+            </span>
+            <span>Dedicated support</span>
+          </li>
+        </ul>
+        <div class="action">
+          {% comment %} <a class="button" href="#">Choose Plan (Coming Soon)</a> {% endcomment %}
+          <a class="button" href="#">(Coming Soon)</a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Device Plans (Updated Section) -->
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">Device Plans</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in all_devices %}
-      <div class="bg-gradient-to-r from-fuchsia-400 to-fuchsia-500 p-6 rounded-xl shadow-lg text-white">
-        <h3 class="text-lg font-semibold">{{ item.device.alias|default:item.device.device_id }}</h3>
-        <p class="text-sm mt-2">Subscription Status: <span class="font-medium">Pending Setup</span></p>
-        <p class="text-sm">Manage your subscription plan for this device.</p>
-        <a href="#" class="mt-4 inline-block bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg">Manage Subscription (Coming Soon)</a>
+      <div class="subscription-card relative overflow-hidden">
+        <div class="inner">
+          <span class="pricing">
+            <span>
+              <i class="fa-solid fa-cart-shopping"></i> 
+              Pending Setup
+            </span>
+          </span>
+          <p class="title">{{ item.device.alias|default:item.device.device_id }}</p>
+          <p class="info">Manage your subscription plan for this device.</p>
+          <div class="action">
+            <a class="button" href="{% url 'subscriptions' device_id=item.device.device_id %}">
+              View Plan Details
+            </a>
+          </div>
+        </div>
       </div>
     {% empty %}
-      <p class="text-gray-600 dark:text-gray-400">No devices to manage subscriptions for.</p>
+      <p class="text-gray-600">No devices to manage subscriptions for.</p>
     {% endfor %}
   </div>
 </div>
+
+<style>
+.bg-gold {
+  background: #EFBF04;
+}
+.device-card, .subscription-card {
+  border-radius: 16px;
+  box-shadow: 0 30px 30px -25px rgba(0, 38, 255, 0.205);
+  padding: 10px;
+  background-color: #fff;
+  color: #697e91;
+  max-width: 300px;
+  width: 100%;
+}
+
+.device-card strong, .subscription-card strong {
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.device-card .inner {
+  align-items: center;
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #e6f4ea;
+  border-radius: 12px;
+  position: relative;
+}
+
+.subscription-card .inner {
+  align-items: center;
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #f3e8ff;
+  border-radius: 12px;
+  position: relative;
+}
+
+.device-card .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #c3e6cb;
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.625em 0.75em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.device-card .pricing.shared-device {
+  background-color: #fed7aa;
+}
+
+.subscription-card .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #d8b4fe;
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.625em 0.75em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.device-card .pricing small, .subscription-card .pricing small {
+  color: #707a91;
+  font-size: 0.75em;
+  margin-left: 0.25em;
+}
+
+.device-card .title, .subscription-card .title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #192a2d;
+}
+
+.device-card .title + *, .subscription-card .title + * {
+  margin-top: 0.75rem;
+}
+
+.device-card .info, .subscription-card .info {
+  color: #697e91;
+}
+
+.device-card .info + *, .subscription-card .info + * {
+  margin-top: 1rem;
+}
+
+.subscription-card .features {
+  display: flex;
+  flex-direction: column;
+}
+
+.subscription-card .features li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subscription-card .features li + * {
+  margin-top: 0.75rem;
+}
+
+.subscription-card .features .icon {
+  background-color: #13af80;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+}
+
+.subscription-card .features .icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.subscription-card .features + * {
+  margin-top: 1.25rem;
+}
+
+.device-card .action, .subscription-card .action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  margin-top: 1.25rem;
+}
+
+.device-card .button, .subscription-card .button {
+  background-color: #13af80;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.125rem;
+  text-align: center;
+  border: 0;
+  outline: 0;
+  width: 100%;
+  padding: 0.625em 0.75em;
+  text-decoration: none;
+}
+
+.device-card .button:hover, .device-card .button:focus,
+.subscription-card .button:hover, .subscription-card .button:focus {
+  background-color: #0f8c62;
+}
+</style>
 {% endblock %}

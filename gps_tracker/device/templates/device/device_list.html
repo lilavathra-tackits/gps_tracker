@@ -1,88 +1,258 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load device_tags %}
 {% block title %}Device List{% endblock %}
 {% block content %}
-<div class="bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-4">Your Devices</h2>
-    <a href="{% url 'add_device' %}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4">
-        <i class="bi bi-plus-circle"></i> Add Device
-    </a>
-    <a href="{% url 'notifications' %}" class="inline-block bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mb-4 ml-2">
-        <i class="bi bi-bell"></i> Notifications
-    </a>
-    <a href="{% url 'user_settings' %}" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4 ml-2">
-        <i class="bi bi-gear"></i> Settings
-    </a>
-    {% if devices %}
-        <ul class="space-y-4">
-            {% for device in devices %}
-                <li class="border p-4 rounded-lg">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-lg font-semibold">{{ device.alias|default:device.device_id }}</h3>
-                            <p class="text-gray-600">ID: {{ device.device_id }}</p>
-                            <p class="text-gray-600">Created: {{ device.created_at|date:"Y-m-d H:i" }}</p>
-                            <p class="text-gray-600">Update Interval: {{ device.update_interval }} minutes</p>
-                        </div>
-                        <div class="space-x-2">
-                            <a href="{% url 'dashboard' device_id=device.device_id %}" class="text-blue-600 hover:underline">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
-                            <a href="{% url 'edit_device' device_id=device.device_id %}" class="text-yellow-600 hover:underline">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <a href="{% url 'share_device' device_id=device.device_id %}" class="text-green-600 hover:underline">
-                                <i class="bi bi-share"></i> Share
-                            </a>
-                        </div>
-                    </div>
+<div class="container mx-auto p-6 animate__animated animate__fadeIn">
+  <div class="bg-[#dde1e2] p-6 rounded-lg shadow-md">
+
+    <!-- Tab Filter -->
+    <div class="flex gap-2 mb-6">
+      <button id="tab-all" class="tab-button px-4 py-2 rounded-lg bg-[#13af80] text-white hover:bg-[#0f8c62] transition duration-300 active">All</button>
+      <button id="tab-devices" class="tab-button px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 transition duration-300">Devices</button>
+      <button id="tab-shared" class="tab-button px-4 py-2 rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 transition duration-300">Shared Devices</button>
+    </div>
+
+    <!-- Your Devices -->
+    <div id="devices-section" class="tab-content">
+      <h2 class="text-2xl font-bold mb-4 text-gray-700">Your Devices</h2>
+      {% if devices %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {% for device in devices %}
+            <div class="device-card">
+              <div class="inner">
+                {% comment %} <span class="pricing {% with shares=device.deviceshare_set.all %}{% if shares %}shared-device{% endif %}{% endwith %}">
+                  <span>
                     {% with shares=device.deviceshare_set.all %}
-                        {% if shares %}
-                            <div class="mt-2">
-                                <p class="text-sm font-semibold">Shared with ({{ shares.count }}):</p>
-                                <ul class="ml-4 space-y-1">
-                                    {% for share in shares %}
-                                        <li>
-                                            <span class="text-gray-600">{{ share.shared_with.username }} ({{ share.permission|title }})</span>
-                                            <a href="{% url 'modify_share' device_id=device.device_id share_id=share.id %}" class="text-purple-600 hover:underline ml-2">
-                                                <i class="bi bi-gear"></i> Manage
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
+                      {% if shares %}You Shared {% else %}Owned{% endif %}
                     {% endwith %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p class="text-gray-600">No devices found.</p>
-    {% endif %}
-    {% if shared_devices %}
-        <h2 class="text-2xl font-bold mt-8 mb-4">Shared Devices</h2>
-        <ul class="space-y-4">
-            {% for share in shared_devices %}
-                <li class="border p-4 rounded-lg">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-lg font-semibold">{{ share.device.alias|default:share.device.device_id }}</h3>
-                            <p class="text-gray-600">ID: {{ share.device.device_id }}</p>
-                            <p class="text-gray-600">Permission: {{ share.permission|title }}</p>
-                        </div>
-                        <div class="space-x-2">
-                            <a href="{% url 'dashboard' device_id=share.device.device_id %}" class="text-blue-600 hover:underline">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
-                            {% if share.permission == 'edit' %}
-                            <a href="{% url 'share_edit_device' device_id=share.device.device_id %}" class="text-yellow-600 hover:underline">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            {% endif %}
-                        </div>
+                  </span>
+                </span> {% endcomment %}
+                <!-- Row 1: Device Name and ID -->
+                <p class="title">{{ device.alias|default:device.device_id }}</p>
+                <p class="info whitespace-nowrap">ID: {{ device.device_id|truncate_id }}</p>
+                <!-- Row 2: Dashboard Button -->
+                <div class="action mt-4">
+                  <a href="{% url 'dashboard' device_id=device.device_id %}" class="block w-full bg-[#13af80] text-white text-center py-2 rounded hover:bg-[#0f8c62] transition duration-300">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                  </a>
+                </div>
+                <!-- Row 3: Edit and Share Buttons -->
+                <div class="action mt-2 flex gap-2">
+                  <a href="{% url 'edit_device' device_id=device.device_id %}" class="flex-1 bg-[#13af80] text-white text-center py-2 rounded hover:bg-[#0f8c62] transition duration-300">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <a href="{% url 'share_device' device_id=device.device_id %}" class="flex-1 bg-[#13af80] text-white text-center py-2 rounded hover:bg-[#0f8c62] transition duration-300">
+                    <i class="fas fa-share-alt"></i> Share
+                  </a>
+                </div>
+                <!-- Row 4: Manage Button and Shared With -->
+                {% with shares=device.deviceshare_set.all %}
+                  {% if shares %}
+                    <div class="action mt-2">
+                      <a href="{% url 'manage_all_shares' %}" class="block w-full bg-[#13af80] text-white text-center py-2 rounded hover:bg-[#0f8c62] transition duration-300">
+                        <i class="fas fa-cog"></i> Manage
+                      </a>
                     </div>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+                  {% endif %}
+                {% endwith %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-gray-600">No devices found.</p>
+      {% endif %}
+    </div>
+
+    <!-- Shared Devices -->
+    <div id="shared-section" class="tab-content">
+      <h2 class="text-2xl font-bold mt-8 mb-4 text-gray-700">Shared Devices</h2>
+      {% if shared_devices %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {% for share in shared_devices %}
+            <div class="shared-device-card">
+              <div class="inner">
+                <span class="pricing">
+                  <span>{{ share.permission|title }}</span>
+                </span>
+                <!-- Row 1: Device Name and ID -->
+                <p class="title">{{ share.device.alias|default:share.device.device_id }}</p>
+                <p class="info whitespace-nowrap">ID: {{ share.device.device_id|truncate_id }}</p>
+                <!-- Row 2: Dashboard Button -->
+                <div class="action mt-4">
+                  <a href="{% url 'dashboard' device_id=share.device.device_id %}" class="block w-full bg-[#13af80] text-white text-center py-2 rounded hover:bg-[#0f8c62] transition duration-300">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                  </a>
+                </div>
+                <!-- Row 3: Edit Button (if applicable) -->
+                {% if share.permission == 'edit' %}
+                  <div class="action mt-2">
+                    <a href="{% url 'share_edit_device' device_id=share.device.device_id %}" class="block w-full bg-[#13af80] text-white text-center py-2 rounded hover:bg-[#0f8c62] transition duration-300">
+                      <i class="fas fa-edit"></i> Edit
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-gray-600">No shared devices found.</p>
+      {% endif %}
+    </div>
+  </div>
 </div>
+
+<style>
+.device-card, .shared-device-card {
+  border-radius: 16px;
+  box-shadow: 0 30px 30px -25px rgba(0, 38, 255, 0.205);
+  padding: 10px;
+  background-color: #fff;
+  color: #697e91;
+  max-width: 300px;
+  width: 100%;
+}
+
+.device-card strong, .shared-device-card strong {
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.device-card .inner {
+  align-items: center;
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #e6f4ea; /* Light green for Device Cards */
+  border-radius: 12px;
+  position: relative;
+}
+
+.shared-device-card .inner {
+  align-items: center;
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #fef9c3; /* Light yellow for Shared Devices */
+  border-radius: 12px;
+  position: relative;
+}
+
+.device-card .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #c3e6cb; /* Light green for Owned Devices */
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.625em 0.75em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.device-card .pricing.shared-device {
+  background-color: #fed7aa; /* Light orange for Shared Devices */
+}
+
+.shared-device-card .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #fef08a; /* Complementary yellow for Shared Devices */
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.625em 0.75em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.device-card .pricing small, .shared-device-card .pricing small {
+  color: #707a91;
+  font-size: 0.75em;
+  margin-left: 0.25em;
+}
+
+.device-card .title, .shared-device-card .title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #192a2d;
+}
+
+.device-card .title + *, .shared-device-card .title + * {
+  margin-top: 0.75rem;
+}
+
+.device-card .info, .shared-device-card .info {
+  color: #697e91;
+}
+
+.device-card .info + *, .shared-device-card .info + * {
+  margin-top: 1rem;
+}
+
+.device-card .action, .shared-device-card .action {
+  width: 100%;
+}
+
+/* Tab styles */
+.tab-button {
+  font-weight: 500;
+}
+
+.tab-button.active {
+  background-color: #13af80 !important;
+  color: #fff !important;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const tabs = document.querySelectorAll(".tab-button");
+  const contents = document.querySelectorAll(".tab-content");
+
+  function setActiveTab(tabId) {
+    tabs.forEach(tab => {
+      tab.classList.remove("active");
+      tab.classList.add("bg-gray-300", "text-gray-700");
+      tab.classList.remove("bg-[#13af80]", "text-white");
+    });
+
+    contents.forEach(content => {
+      content.classList.remove("active");
+    });
+
+    const activeTab = document.getElementById(tabId);
+    activeTab.classList.add("active", "bg-[#13af80]", "text-white");
+
+    if (tabId === "tab-all") {
+      document.getElementById("devices-section").classList.add("active");
+      document.getElementById("shared-section").classList.add("active");
+    } else if (tabId === "tab-devices") {
+      document.getElementById("devices-section").classList.add("active");
+    } else if (tabId === "tab-shared") {
+      document.getElementById("shared-section").classList.add("active");
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      setActiveTab(tab.id);
+    });
+  });
+
+  // Set initial tab
+  setActiveTab("tab-all");
+});
+</script>
 {% endblock %}

@@ -1,147 +1,170 @@
 {% extends "base.html" %}
 {% block title %}Device Travel History - {{ device.device_id }}{% endblock %}
 {% block content %}
-<h1 class="text-3xl font-bold text-gray-700">Travel History for Device: {{ device.device_id }}</h1>
-<p class="text-gray-500 mt-1">View the device's travel path over selected time periods</p>
+<div class="container mx-auto p-6">
+  <h1 class="text-3xl font-bold text-gray-700">Travel History for Device: {{ device.device_id }}</h1>
+  <p class="text-gray-500 mt-1">View the device's travel path over selected time periods</p>
 
-<div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+  <div class="mt-6 bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border">
     <div class="flex items-center gap-4 mb-4">
-        <label for="timeFilter" class="text-lg font-semibold">Select Time Range:</label>
-        <select id="timeFilter" class="border rounded-md p-2">
-            <option value="1">Last 1 Hour</option>
-            <option value="10">Last 10 Hours</option>
-            <option value="24" selected>Last 1 Day</option>
-            <option value="168">Last 1 Week</option>
-        </select>
-        <p class="text-gray-500 italic hidden" id="loading">Loading data...</p>
-        <p class="text-red-600 font-bold hidden" id="error"></p>
+      <label for="timeFilter" class="text-lg font-semibold text-[#192a2d]">Select Time Range:</label>
+      <select id="timeFilter" class="w-full max-w-xs p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
+        <option value="1">Last 1 Hour</option>
+        <option value="10">Last 10 Hours</option>
+        <option value="24" selected>Last 1 Day</option>
+        <option value="168">Last 1 Week</option>
+      </select>
+      <div class="flex items-center gap-2">
+        <svg id="loading" class="hidden animate-spin h-5 w-5 text-[#13af80]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-gray-500 italic hidden" id="loading-text">Loading data...</p>
+      </div>
+      <p class="text-red-600 font-bold hidden" id="error"></p>
     </div>
 
     <div id="map" class="h-[500px] w-full rounded-lg"></div>
-    <div class="mt-4">
-        <p class="text-gray-600">Total Distance: <span id="totalDistance">0</span> meters</p>
-        <p class="text-gray-600">Data Points: <span id="dataPoints">0</span></p>
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <p class="text-gray-600">Total Distance: <span id="totalDistance">0</span> meters</p>
+      <p class="text-gray-600">Data Points: <span id="dataPoints">0</span></p>
     </div>
+  </div>
 </div>
+
+<style>
+#map { 
+  height: 500px; 
+  width: 100%; 
+  border-radius: 8px; 
+  background: #e5e7eb; 
+  border: 1px solid #13af80; 
+  z-index: 10; /* Lower z-index to ensure map is below sidebar and navbar */
+}
+.leaflet-control { 
+  z-index: 400 !important; /* Ensure zoom controls are above map but below sidebar/navbar */
+}
+</style>
 {% endblock %}
 {% block extra_scripts %}
 <script>
-    // Initialize Leaflet Map
-    const map = L.map('map').setView([13.0827, 80.2707], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19
-    }).addTo(map);
-    let polyline = L.polyline([], { color: '#3B82F6', weight: 5 }).addTo(map);
-    let marker = L.marker([13.0827, 80.2707]).addTo(map);
+// Initialize Leaflet Map
+const map = L.map('map').setView([13.0827, 80.2707], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 19
+}).addTo(map);
+let polyline = L.polyline([], { color: '#3B82F6', weight: 5 }).addTo(map);
+let marker = L.marker([13.0827, 80.2707]).addTo(map);
 
-    map.on('tileerror', function(error, tile) {
-        console.warn('Tile loading error:', error, tile);
-        $('#error').text('Error loading map tiles.').show();
+map.on('tileerror', function(error, tile) {
+  console.warn('Tile loading error:', error, tile);
+  document.getElementById('error').textContent = 'Error loading map tiles.';
+  document.getElementById('error').classList.remove('hidden');
+});
+
+// Fetch and display travel history
+async function fetchTravelHistory(hours) {
+  const historyUrl = "{% url 'device_history_data' device_id=device.device_id %}";
+  const timeThreshold = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+  const errorDiv = document.getElementById('error');
+  const loadingDiv = document.getElementById('loading');
+  const loadingText = document.getElementById('loading-text');
+  const totalDistanceSpan = document.getElementById('totalDistance');
+  const dataPointsSpan = document.getElementById('dataPoints');
+
+  try {
+    loadingDiv.classList.remove('hidden');
+    loadingText.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
+    polyline.setLatLngs([]);
+    marker.setLatLng([13.0827, 80.2707]);
+
+    const response = await fetch(`${historyUrl}?time_threshold=${encodeURIComponent(timeThreshold)}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
     });
 
-    // Fetch and display travel history
-    function fetchTravelHistory(hours) {
-        const historyUrl = "{% url 'device_history_data' device_id=device.device_id %}";
-        const timeThreshold = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
-        const errorDiv = $('#error');
-        const loadingDiv = $('#loading');
-        const totalDistanceSpan = $('#totalDistance');
-        const dataPointsSpan = $('#dataPoints');
-
-        $.ajax({
-            url: historyUrl,
-            method: 'GET',
-            data: { time_threshold: timeThreshold },
-            dataType: 'json',
-            beforeSend: function() {
-                loadingDiv.show();
-                errorDiv.hide();
-                polyline.setLatLngs([]);
-                marker.setLatLng([13.0827, 80.2707]);
-            },
-            success: function(data) {
-                loadingDiv.hide();
-                if (data.error) {
-                    errorDiv.text(`Error: ${data.error}`).show();
-                    totalDistanceSpan.text('0');
-                    dataPointsSpan.text('0');
-                    return;
-                }
-                dataPointsSpan.text(data.count);
-                totalDistanceSpan.text((data.total_distance || 0).toFixed(2));
-                const points = data.data_points.map(point => [point.latitude, point.longitude]);
-                polyline.setLatLngs(points);
-                if (points.length > 0) {
-                    map.fitBounds(polyline.getBounds());
-                    marker.setLatLng(points[points.length - 1]);
-                } else {
-                    errorDiv.text('No valid coordinates available.').show();
-                }
-            },
-            error: function(xhr) {
-                loadingDiv.hide();
-                errorDiv.text(`Error: ${xhr.statusText || 'Failed to fetch data'}`).show();
-                totalDistanceSpan.text('0');
-                dataPointsSpan.text('0');
-            }
-        });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    // Event listeners
-    $('#timeFilter').on('change', function() {
-        const hours = parseInt(this.value);
-        fetchTravelHistory(hours);
-    });
+    const data = await response.json();
 
-    // Initial fetch for default time range (24 hours)
-    fetchTravelHistory(24);
+    loadingDiv.classList.add('hidden');
+    loadingText.classList.add('hidden');
 
+    if (data.error) {
+      errorDiv.textContent = `Error: ${data.error}`;
+      errorDiv.classList.remove('hidden');
+      totalDistanceSpan.textContent = '0';
+      dataPointsSpan.textContent = '0';
+      return;
+    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // Theme Toggle
-      const themeToggle = document.getElementById('theme-toggle');
-      const themeIcon = document.getElementById('theme-icon');
-      const currentTheme = localStorage.getItem('theme') || 'light';
-      if (themeIcon) {
-        if (currentTheme === 'dark') {
-          document.documentElement.classList.add('dark');
-          themeIcon.classList.replace('fa-sun', 'fa-moon');
-        }
-        if (themeToggle) {
-          themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-              localStorage.setItem('theme', 'dark');
-              themeIcon.classList.replace('fa-sun', 'fa-moon');
-            } else {
-              localStorage.setItem('theme', 'light');
-              themeIcon.classList.replace('fa-moon', 'fa-sun');
-            }
-            console.log('Theme toggled:', document.documentElement.classList.contains('dark') ? 'Dark' : 'Light');
-          });
-        } else {
-          console.error('Theme toggle element not found');
-        }
-      } else {
-        console.error('Theme icon element not found');
-      }
+    dataPointsSpan.textContent = data.count;
+    totalDistanceSpan.textContent = (data.total_distance || 0).toFixed(2);
+    const points = data.data_points.map(point => [point.latitude, point.longitude]);
+    polyline.setLatLngs(points);
 
-      // Sidebar Toggle
+    if (points.length > 0) {
+      map.fitBounds(polyline.getBounds());
+      marker.setLatLng(points[points.length - 1]);
+    } else {
+      errorDiv.textContent = 'No valid coordinates available.';
+      errorDiv.classList.remove('hidden');
+    }
+  } catch (error) {
+    loadingDiv.classList.add('hidden');
+    loadingText.classList.add('hidden');
+    errorDiv.textContent = `Error: ${error.message || 'Failed to fetch data'}`;
+    errorDiv.classList.remove('hidden');
+    totalDistanceSpan.textContent = '0';
+    dataPointsSpan.textContent = '0';
+    console.error('Fetch error:', error);
+  }
+}
+
+// Event listeners
+document.getElementById('timeFilter').addEventListener('change', function() {
+  const hours = parseInt(this.value);
+  fetchTravelHistory(hours);
+});
+
+// Initial fetch for default time range (24 hours)
+fetchTravelHistory(24);
+
+document.addEventListener('DOMContentLoaded', () => { 
       const menuToggle = document.getElementById('menu-toggle');
       const sidebar = document.getElementById('sidebar');
+
+      // Function to set sidebar state based on screen size
+      function setSidebarState() {
+        if (window.innerWidth >= 1024) {
+          // Desktop (1024px and above): Sidebar open by default
+          sidebar.classList.remove('sidebar-hidden');
+        } else {
+          // Mobile and tablet (below 1024px): Sidebar closed by default
+          sidebar.classList.add('sidebar-hidden');
+        }
+      }
+
+      // Set initial sidebar state on page load
       if (menuToggle && sidebar) {
+        setSidebarState();
+
+        // Toggle sidebar on button click
         menuToggle.addEventListener('click', () => {
           sidebar.classList.toggle('sidebar-hidden');
           console.log('Sidebar toggled:', sidebar.classList.contains('sidebar-hidden') ? 'Closed' : 'Open');
         });
+
+        // Update sidebar state on window resize
+        window.addEventListener('resize', setSidebarState);
       } else {
         console.error('Sidebar toggle elements not found:', { menuToggle, sidebar });
-      }
-
-      // Ensure sidebar is visible on desktop
-      if (window.innerWidth >= 768) {
-        sidebar.classList.remove('sidebar-hidden');
       }
 
       // Notification Toggle and Mark as Read
@@ -217,6 +240,5 @@
         console.error(`Menu element not found for ID: ${id}`);
       }
     }
-
 </script>
 {% endblock %}

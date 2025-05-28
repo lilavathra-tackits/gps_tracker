@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Edit Device - {{ device.alias|default:device.device_id }}{% endblock %}
+{% block title %}Add Device{% endblock %}
 {% block content %}
 <div class="container mx-auto p-6 animate__animated animate__fadeIn">
-  <h2 class="text-2xl font-bold mb-4 text-gray-700">Edit Device: {{ device.alias|default:device.device_id }}</h2>
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">Add New Device</h2>
 
-  <!-- Edit Device Form -->
+  <!-- Add Device Form -->
   <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border">
     <form method="post" class="space-y-6">
       {% csrf_token %}
@@ -12,34 +12,34 @@
       <div class="flex items-center gap-4">
         <div class="flex-1">
           <label for="device_id" class="block text-sm font-medium text-gray-700">Device ID</label>
-          <input type="readonly" name="device_id" id="device_id" value="{{ device.device_id }}" readonly class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none  text-gray-700 bg-white/80">
+          <input type="text" name="device_id" id="device_id" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         </div>
       </div>
-      <!-- Alias -->
+      <!-- Device Name (Alias) -->
       <div class="flex items-center gap-4">
         <div class="flex-1">
-          <label for="alias" class="block text-sm font-medium text-gray-700">Name </label>
-          <input type="text" name="alias" id="alias" value="{{ device.alias|default_if_none:'' }}" class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
+          <label for="alias" class="block text-sm font-medium text-gray-700">Device Name (optional)</label>
+          <input type="text" name="alias" id="alias" class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         </div>
       </div>
       <!-- Device Password -->
       <div class="flex items-center gap-4">
         <div class="flex-1">
-          <label for="device_password" class="block text-sm font-medium text-gray-700">Device Password (leave blank to keep unchanged)</label>
-          <input type="password" name="device_password" id="device_password" class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
+          <label for="device_password" class="block text-sm font-medium text-gray-700">Device Password</label>
+          <input type="password" name="device_password" id="device_password" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         </div>
       </div>
       <!-- Update Interval -->
       <div class="flex items-center gap-4">
         <div class="flex-1">
           <label for="update_interval" class="block text-sm font-medium text-gray-700">Update Interval (minutes)</label>
-          <input type="number" name="update_interval" id="update_interval" value="{{ device.update_interval }}" min="1" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
+          <input type="number" name="update_interval" id="update_interval" value="60" min="1" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         </div>
       </div>
       <!-- Submit Button -->
       <div class="flex justify-end">
         <button type="submit" class="bg-[#13af80] text-white py-2 px-4 rounded-lg hover:bg-[#0f8c62] transition duration-300">
-          <i class="bi bi-save me-1"></i> Save Changes
+          <i class="bi bi-plus-circle me-1"></i> Add Device
         </button>
       </div>
     </form>

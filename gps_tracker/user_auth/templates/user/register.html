@@ -1,25 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold text-center text-gray-700">Register</h2>
-        <form method="POST" class="mt-4">
-            {% csrf_token %}
-            <input type="text" name="username" placeholder="Username" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3" required>
-            <input type="email" name="email" placeholder="Email" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3" required>
-            <input type="password" name="password" placeholder="Password" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3" required>
-            <input type="password" name="confirm_password" placeholder="Confirm Password" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3" required>
-            <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">Register</button>
-        </form>
-        <p class="mt-4 text-sm text-center">
-            Already have an account? <a href="{% url 'login' %}" class="text-blue-500">Login</a>
-        </p>
-    </div>
-</body>
-</html>
+{% extends "user/auth_base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block auth_content %}
+<div class="w-full max-w-sm p-5 glass-card rounded-lg animate__animated animate__fadeIn animate__slow">
+    <h2 class="text-2xl font-bold text-center text-white mb-4">Register</h2>
+    <form method="POST" class="space-y-3">
+        {% csrf_token %}
+        <div>
+            <label for="username" class="block text-sm font-medium text-white">Username</label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <i class="bi bi-person text-gray-300"></i>
+                </span>
+                <input type="text" name="username" id="username" placeholder="Username" class="w-full pl-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-sm text-gray-700 bg-white/80" required>
+            </div>
+        </div>
+        <div>
+            <label for="email" class="block text-sm font-medium text-white">Email</label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <i class="bi bi-envelope text-gray-300"></i>
+                </span>
+                <input type="email" name="email" id="email" placeholder="Email" class="w-full pl-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-sm text-gray-700 bg-white/80" required>
+            </div>
+        </div>
+        <div>
+            <label for="password" class="block text-sm font-medium text-white">Password</label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <i class="bi bi-lock text-gray-300"></i>
+                </span>
+                <input type="password" name="password" id="password" placeholder="Password" class="w-full pl-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-sm text-gray-700 bg-white/80" required>
+            </div>
+        </div>
+        <div>
+            <label for="confirm_password" class="block text-sm font-medium text-white">Confirm Password</label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <i class="bi bi-lock text-gray-300"></i>
+                </span>
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" class="w-full pl-10 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-sm text-gray-700 bg-white/80" required>
+            </div>
+        </div>
+        <button type="submit" class="w-full bg-[#13af80] text-white p-2 rounded-md hover:bg-[#0f8c62] transition duration-300">
+            <i class="bi bi-person-plus me-1"></i>Register
+        </button>
+    </form>
+    <p class="mt-4 text-sm text-center text-gray-200">
+        Already have an account? <a href="{% url 'login' %}" class="text-[#13af80] hover:text-[#0f8c62] transition duration-300">Login</a>
+    </p>
+</div>
+{% endblock %}

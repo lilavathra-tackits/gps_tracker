@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Device Dashboard - {{ data.alias }}{% endblock %}
 {% block content %}
-<h2 class="text-2xl font-bold mb-4 text-gray-700 dark:text-gray-200">Dashboard for {{ data.alias }}</h2>
-<p class="text-gray-600 dark:text-gray-400 mb-4">Device ID: {{ data.deviceId }}</p>
+<h2 class="text-2xl font-bold mb-4 text-gray-700">Dashboard for {{ data.alias }}</h2>
+<p class="text-gray-600 mb-4">Device ID: {{ data.deviceId }}</p>
 
 <!-- First Row: Speed, Battery, Compass -->
 <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
     <!-- Speed -->
-    <div class="bg-gradient-to-r from-blue-400 to-blue-500 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full">
-        <h3 class="text-lg font-semibold text-white">Speed</h3>
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border ">
+        <h3 class="text-lg font-semibold text-[#192a2d] mb-2"><i class="fa-solid fa-gauge"></i> Speed</h3>
         <canvas id="speedometer" class="mt-4 max-w-[250px] h-[200px] mx-auto"></canvas>
-        <p class="text-white mt-2 text-base">Speed: 
+        <p class="text-gray-700 mt-2 text-base">Speed: 
             <span id="speedValue">
                 {% if data.has_data %}
                     {{ data.speed|floatformat:1 }} km/h
@@ -22,10 +22,10 @@
     </div>
 
     <!-- Battery -->
-    <div class="bg-gradient-to-r from-green-400 to-green-500 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full">
-        <h3 class="text-lg font-semibold text-white mb-2">Battery Charge</h3>
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border ">
+        <h3 class="text-lg font-semibold text-[#192a2d] mb-2"><i class="fa-solid fa-battery-half"></i> Battery Charge</h3>
         <canvas id="batteryGauge" width="200" height="200" class="mx-auto block"></canvas>
-        <p class="text-white mt-2 text-base">Battery: 
+        <p class="text-gray-700 mt-2 text-base">Battery: 
             <span id="batteryValue">
                 {% if data.has_data %}
                     {{ data.charge }}%
@@ -37,10 +37,10 @@
     </div>
 
     <!-- Compass -->
-    <div class="bg-gradient-to-r from-purple-400 to-purple-500 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full">
-        <h3 class="text-lg font-semibold text-white mb-4">Heading</h3>
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border">
+        <h3 class="text-lg font-semibold text-[#192a2d] mb-4"><i class="fa-solid fa-compass"></i> Heading</h3>
         <canvas id="compass" width="150" height="150" class="mx-auto"></canvas>
-        <p class="text-white mt-2 text-base">Heading: 
+        <p class="text-gray-700 mt-2 text-base">Heading: 
             <span id="heading">
                 {% if data.has_data %}
                     {{ data.heading }}°
@@ -54,14 +54,14 @@
 
 <!-- Location Details -->
 <div class="mt-6">
-    <div class="bg-gradient-to-r from-orange-400 to-orange-500 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
-        <h3 class="text-lg font-semibold text-white mb-4">Location Details</h3>
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
+        <h3 class="text-lg font-semibold text-[#192a2d] mb-4">Location Details</h3>
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Left: Coordinates and Altitude -->
             <div class="flex-1">
-                <ul class="text-sm space-y-3 text-gray-100">
+                <ul class="text-sm space-y-3 text-gray-700">
                     <li class="flex items-center">
-                        <i class="fas fa-map-marker-alt text-white mr-3 text-lg"></i>
+                        <i class="fas fa-map-marker-alt text-[#13af80] mr-3 text-lg"></i>
                         <span>Latitude: 
                             <span id="latitude" class="font-medium">
                                 {% if data.has_data %}
@@ -73,7 +73,7 @@
                         </span>
                     </li>
                     <li class="flex items-center">
-                        <i class="fas fa-globe text-white mr-3 text-lg"></i>
+                        <i class="fas fa-globe text-[#13af80] mr-3 text-lg"></i>
                         <span>Longitude: 
                             <span id="longitude" class="font-medium">
                                 {% if data.has_data %}
@@ -85,7 +85,7 @@
                         </span>
                     </li>
                     <li class="flex items-center">
-                        <i class="fas fa-mountain text-white mr-3 text-lg"></i>
+                        <i class="fas fa-mountain text-[#13af80] mr-3 text-lg"></i>
                         <span>Altitude: 
                             <span id="altitude" class="font-medium">
                                 {% if data.has_data %}
@@ -100,9 +100,9 @@
             </div>
             <!-- Right: Battery, Distance, and Heading -->
             <div class="flex-1">
-                <ul class="text-sm space-y-3 text-gray-100">
+                <ul class="text-sm space-y-3 text-gray-700">
                     <li class="flex items-center">
-                        <i class="fas fa-battery-half text-white mr-3 text-lg"></i>
+                        <i class="fas fa-battery-half text-[#13af80] mr-3 text-lg"></i>
                         <span>Battery: 
                             <span id="charge" class="font-medium">
                                 {% if data.has_data %}
@@ -114,7 +114,7 @@
                         </span>
                     </li>
                     <li class="flex items-center">
-                        <i class="fas fa-road text-white mr-3 text-lg"></i>
+                        <i class="fas fa-road text-[#13af80] mr-3 text-lg"></i>
                         <span>Total Distance (24h): 
                             <span id="totalDistance" class="font-medium">
                                 {% if data.has_data %}
@@ -126,7 +126,7 @@
                         </span>
                     </li>
                     <li class="flex items-center">
-                        <i class="fas fa-compass text-white mr-3 text-lg"></i>
+                        <i class="fas fa-compass text-[#13af80] mr-3 text-lg"></i>
                         <span>Heading: 
                             <span id="locationHeading" class="font-medium">
                                 {% if data.has_data %}
@@ -144,10 +144,10 @@
 </div>
 
 <!-- Map Section -->
-<div class="mt-8 bg-gradient-to-r from-teal-400 to-teal-500 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
-    <h2 class="text-xl sm:text-2xl font-bold text-white mb-4">Device Location</h2>
+<div class="mt-8 bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
+    <h2 class="text-xl sm:text-2xl font-bold text-[#192a2d] mb-4">Device Location</h2>
     <div id="map" class="h-[300px] sm:h-[400px] w-full rounded-lg"></div>
-    <p class="text-center text-sm sm:text-base font-medium text-white mt-4">
+    <p class="text-center text-sm sm:text-base font-medium text-gray-700 mt-4">
         🌍 Latitude: <span id="latitudeDisplay">
             {% if data.has_data %}
                 {{ data.location.latitude }}
@@ -163,17 +163,28 @@
             {% endif %}
         </span>
     </p>
-    <p class="text-red-300 font-bold mt-2 hidden text-center" id="error"></p>
-    <p class="text-gray-200 italic mt-2 hidden text-center" id="loading">Fetching latest data...</p>
+    <p class="text-red-600 font-bold mt-2 hidden text-center" id="error"></p>
+    <p class="text-gray-600 italic mt-2 hidden text-center" id="loading">Fetching latest data...</p>
 </div>
 
 {% endblock %}
 
 {% block extra_scripts %}
 <style>
-    #map { height: 400px; width: 100%; border-radius: 8px; background: #e5e7eb; }
-    .dark #map { background: #4b5563; }
-    canvas { display: block; margin: 0 auto; }
+    #map { 
+        height: 400px; 
+        width: 100%; 
+        border-radius: 8px; 
+        background: #e5e7eb; 
+        z-index: 100; /* Ensure map is below right dock, sidebar, and navbar */
+    }
+    canvas { 
+        display: block; 
+        margin: 0 auto; 
+    }
+    .leaflet-control { 
+        z-index: 100 !important; /* Ensure zoom controls are below right dock, sidebar, and navbar */
+    }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -199,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, width, height);
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.strokeStyle = document.documentElement.classList.contains('dark') ? "#9ca3af" : "#d1d5db";
+        ctx.strokeStyle = "#d1d5db";
         ctx.lineWidth = 15;
         ctx.stroke();
         const endAngle = (percentage / 100) * 2 * Math.PI;
@@ -209,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = 15;
         ctx.lineCap = "round";
         ctx.stroke();
-        ctx.fillStyle = document.documentElement.classList.contains('dark') ? "#e5e7eb" : "#1f2937";
+        ctx.fillStyle = "#1f2937";
         ctx.font = "20px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -241,20 +252,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI, false);
         ctx.lineWidth = 20;
-        ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#d1d5db';
+        ctx.strokeStyle = '#d1d5db';
         ctx.stroke();
-        const gradient = ctx.createLinearGradient(0, 0, width, 0);
-        gradient.addColorStop(0, '#4caf50');
-        gradient.addColorStop(0.5, '#fbbf24');
-        gradient.addColorStop(1, '#ef4444');
         ctx.beginPath();
         const speedAngle = Math.PI + (speed / maxSpeed) * Math.PI;
         ctx.arc(centerX, centerY, radius, Math.PI, speedAngle, false);
         ctx.lineWidth = 20;
-        ctx.strokeStyle = gradient;
+        ctx.strokeStyle = '#13af80'; // Use secondary color for the speed arc
         ctx.stroke();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#a0aec0' : '#6b7280';
+        ctx.strokeStyle = '#6b7280';
         for (let i = 0; i <= maxSpeed; i += 20) {
             const angle = Math.PI + (i / maxSpeed) * Math.PI;
             const innerRadius = radius - 10;
@@ -266,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i % 40 === 0) {
                 const labelRadius = radius + 20;
                 ctx.font = '12px Arial';
-                ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151';
+                ctx.fillStyle = '#374151';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(i, centerX + labelRadius * Math.cos(angle), centerY + labelRadius * Math.sin(angle));
@@ -277,14 +284,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.moveTo(centerX, centerY);
         ctx.lineTo(centerX + radius * 0.9 * Math.cos(needleAngle), centerY + radius * 0.9 * Math.sin(needleAngle));
         ctx.lineWidth = 4;
-        ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#d1d5db' : '#1f2937';
+        ctx.strokeStyle = '#1f2937';
         ctx.stroke();
         ctx.beginPath();
         ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
-        ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#d1d5db' : '#1f2937';
+        ctx.fillStyle = '#1f2937';
         ctx.fill();
         ctx.font = '20px Arial';
-        ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151';
+        ctx.fillStyle = '#374151';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(`${speed.toFixed(1)} km/h`, centerX, centerY + radius + 40);
@@ -309,14 +316,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const radius = Math.min(width, height) / 2 - 10;
         ctx.clearRect(0, 0, width, height);
         const validHeading = !isNaN(heading) && heading >= 0 && heading < 360 ? heading : 0;
-        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
-        gradient.addColorStop(0, document.documentElement.classList.contains('dark') ? '#4b5563' : '#ffffff');
-        gradient.addColorStop(1, document.documentElement.classList.contains('dark') ? '#6b7280' : '#e0f2fe');
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = '#ffffff';
         ctx.fill();
-        ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#3b82f6' : '#3b82f6';
+        ctx.strokeStyle = '#13af80'; // Use secondary color for the compass border
         ctx.lineWidth = 2;
         ctx.stroke();
         const directions = ['N', 'E', 'S', 'W'];
@@ -325,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const x = centerX + (radius - 15) * Math.cos(angle);
             const y = centerY + (radius - 15) * Math.sin(angle);
             ctx.font = 'bold 14px Arial';
-            ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#d1d5db' : '#1f2937';
+            ctx.fillStyle = '#1f2937';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(directions[i], x, y);
@@ -340,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
         ctx.beginPath();
         ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#d1d5db' : '#1f2937';
+        ctx.fillStyle = '#1f2937';
         ctx.fill();
     }
     const compassCanvas = document.getElementById("compass");
@@ -367,10 +371,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Leaflet Map
     const mapElement = document.getElementById('map');
     if (mapElement) {
-        const map = L.map('map').setView([initialData.latitude, initialData.longitude], 19);
+        const map = L.map('map', { zoomControl: true }).setView([initialData.latitude, initialData.longitude], 19);
+        // Ensure Leaflet map's pane has a lower z-index
+        map.getPane('mapPane').style.zIndex = 100;
         const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 19
+            maxZoom: 19,
+            zIndex: 100
         }).addTo(map);
         let marker = null;
         if (initialData.hasData) {
@@ -454,36 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })();
     }
 });
-
     document.addEventListener('DOMContentLoaded', () => {
-      // Theme Toggle
-      const themeToggle = document.getElementById('theme-toggle');
-      const themeIcon = document.getElementById('theme-icon');
-      const currentTheme = localStorage.getItem('theme') || 'light';
-      if (themeIcon) {
-        if (currentTheme === 'dark') {
-          document.documentElement.classList.add('dark');
-          themeIcon.classList.replace('fa-sun', 'fa-moon');
-        }
-        if (themeToggle) {
-          themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-              localStorage.setItem('theme', 'dark');
-              themeIcon.classList.replace('fa-sun', 'fa-moon');
-            } else {
-              localStorage.setItem('theme', 'light');
-              themeIcon.classList.replace('fa-moon', 'fa-sun');
-            }
-            console.log('Theme toggled:', document.documentElement.classList.contains('dark') ? 'Dark' : 'Light');
-          });
-        } else {
-          console.error('Theme toggle element not found');
-        }
-      } else {
-        console.error('Theme icon element not found');
-      }
-
       // Sidebar Toggle
       const menuToggle = document.getElementById('menu-toggle');
       const sidebar = document.getElementById('sidebar');
@@ -574,6 +552,5 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error(`Menu element not found for ID: ${id}`);
       }
     }
-
-</script>
+  </script>
 {% endblock %}

@@ -1,28 +1,48 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}User Settings{% endblock %}
 {% block content %}
-<div class="bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-4">User Settings</h2>
-    <form method="post" class="space-y-4">
-        {% csrf_token %}
-        <div>
-            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-            <input type="text" name="username" id="username" value="{{ request.user.username }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+<div class="container mx-auto p-6 animate__animated animate__fadeIn">
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">User Settings</h2>
+
+  <!-- Settings Form -->
+  <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      <!-- Username -->
+      <div class="flex items-center gap-4">
+        <div class="flex-1">
+          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+          <input type="text" name="username" id="username" value="{{ request.user.username }}" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         </div>
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" name="email" id="email" value="{{ request.user.email }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+      </div>
+      <!-- Email -->
+      <div class="flex items-center gap-4">
+        <div class="flex-1">
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" name="email" id="email" value="{{ request.user.email }}" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         </div>
-        <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">New Password (leave blank to keep unchanged)</label>
-            <input type="password" name="password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+      </div>
+      <!-- Password -->
+      <div class="flex items-center gap-4">
+        <div class="flex-1">
+          <label for="password" class="block text-sm font-medium text-gray-700">New Password (leave blank to keep unchanged)</label>
+          <input type="password" name="password" id="password" class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#13af80] text-gray-700 bg-white/80">
         </div>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            <i class="bi bi-save"></i> Save Settings
+      </div>
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button type="submit" class="bg-[#13af80] text-white py-2 px-4 rounded-lg hover:bg-[#0f8c62] transition duration-300">
+          <i class="bi bi-save me-1"></i> Save Settings
         </button>
+      </div>
     </form>
-    <a href="{% url 'device_list' %}" class="inline-block mt-4 text-blue-600 hover:underline">
-        <i class="bi bi-arrow-left"></i> Back to Devices
+  </div>
+
+  <!-- Back to Devices Link -->
+  <div class="mt-6">
+    <a href="{% url 'device_list' %}" class="inline-block text-[#13af80] hover:text-[#0f8c62] transition duration-300">
+      <i class="bi bi-arrow-left me-1"></i> Back to Devices
     </a>
+  </div>
 </div>
 {% endblock %}

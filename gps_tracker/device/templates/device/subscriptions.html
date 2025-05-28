@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}GPS Tracker - Subscription Details{% endblock %}
+{% block content %}
+<div class="container mx-auto p-6 animate__animated animate__fadeInDown">
+  <!-- Device Plan Validity Card -->
+  <h2 class="text-2xl font-bold mb-4 text-gray-700">Device Plan Validity</h2>
+  {% if device %}
+    <div class="subscription-card relative overflow-hidden">
+      <div class="inner">
+        <span class="pricing">
+          <span>
+            <i class="fa-solid fa-clock"></i> 
+            {{ device.plan_name|default:"Pending Setup" }}
+          </span>
+        </span>
+        <p class="title">{{ device.alias|default:device.device_id }}</p>
+        <p class="info">Plan Validity: <span class="font-medium">{{ device.plan_validity_days|default:"365" }} days</span></p>
+        <p class="info">Expiration Date: <span class="font-medium">{{ device.plan_expiration_date|date:"Y-m-d"|default:"Not Set" }}</span></p>
+        <div class="action">
+          <a class="button" href="{% url 'home' %}">
+            Back to Home
+          </a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <p class="text-gray-600">Device not found. <a href="{% url 'home' %}" class="text-[#13af80] hover:text-[#0f8c62] transition duration-300">
+      Back to Home</a>.</p>
+  {% endif %}
+</div>
+
+<style>
+.subscription-card {
+  border-radius: 16px;
+  box-shadow: 0 30px 30px -25px rgba(0, 38, 255, 0.205);
+  padding: 10px;
+  background-color: #fff;
+  color: #697e91;
+  max-width: 300px;
+  width: 100%;
+}
+
+.subscription-card .inner {
+  align-items: center;
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #f3e8ff;
+  border-radius: 12px;
+  position: relative;
+}
+
+.subscription-card .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #d8b4fe;
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.625em 0.75em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.subscription-card .title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #192a2d;
+}
+
+.subscription-card .title + * {
+  margin-top: 0.75rem;
+}
+
+.subscription-card .info {
+  color: #697e91;
+}
+
+.subscription-card .info + * {
+  margin-top: 1rem;
+}
+
+.subscription-card .action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  margin-top: 1.25rem;
+}
+
+.subscription-card .button {
+  background-color: #13af80;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.125rem;
+  text-align: center;
+  border: 0;
+  outline: 0;
+  width: 100%;
+  padding: 0.625em 0.75em;
+  text-decoration: none;
+}
+
+.subscription-card .button:hover,
+.subscription-card .button:focus {
+  background-color: #0f8c62;
+}
+</style>
+{% endblock %}

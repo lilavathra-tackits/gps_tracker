@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Device, DeviceData, SpeedAlert, DeviceShare, Notification, MaintenanceRecord
 from django.contrib import messages
@@ -62,7 +62,12 @@ def home(request):
 def device_list(request):
     devices = Device.objects.filter(user=request.user)
     shared_devices = DeviceShare.objects.filter(shared_with=request.user)
-    return render(request, 'device/device_list.html', {'devices': devices, 'shared_devices': shared_devices})
+    # All notifications for the user (across all devices)
+    notifications = Notification.objects.filter(user=request.user).order_by('-timestamp')[:10]
+    return render(request, 'device/device_list.html', 
+                  {'devices': devices, 
+                   'shared_devices': shared_devices, 
+                   'notifications':notifications})
 
 @login_required
 def add_device(request):
@@ -357,21 +362,25 @@ def share_device(request, device_id):
         messages.error(request, "Device not found.")
         return redirect('device_list')
 
+
 @login_required
-def modify_share(request, device_id, share_id):
-    try:
-        device = Device.objects.get(device_id=device_id, user=request.user)
-        share = DeviceShare.objects.get(id=share_id, device=device)
-        if request.method == 'POST':
-            action = request.POST.get('action')
+def manage_all_shares(request):
+    devices = Device.objects.filter(user=request.user)
+    shares = DeviceShare.objects.filter(device__in=devices)
+
+    if request.method == 'POST':
+        share_id = request.POST.get('share_id')
+        action = request.POST.get('action')
+        try:
+            share = DeviceShare.objects.get(id=share_id, device__in=devices)
             if action == 'delete':
                 share.delete()
-                messages.success(request, "Share removed.")
-            return redirect('device_list')
-        return render(request, 'device/modify_share.html', {'device': device, 'share': share})
-    except (Device.DoesNotExist, DeviceShare.DoesNotExist):
-        messages.error(request, "Device or share not found.")
-        return redirect('device_list')
+                messages.success(request, "Share removed successfully.")
+        except DeviceShare.DoesNotExist:
+            messages.error(request, "Share not found.")
+        return redirect('manage_all_shares')
+
+    return render(request, 'device/manage_all_shares.html', {'devices': devices, 'shares': shares})
 
 @login_required
 def maintenance_status(request, device_id):
@@ -485,6 +494,10 @@ def mark_notification_read(request, notification_id):
 
 @login_required
 def user_settings(request):
+    
+    # All notifications for the user (across all devices)
+    notifications = Notification.objects.filter(user=request.user).order_by('-timestamp')[:10]
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -507,8 +520,27 @@ def user_settings(request):
             user.set_password(password)
             update_session_auth_hash(request, user)  # Keep user logged in after password change
         
+        
+        
+        
         user.save()
         messages.success(request, 'Settings updated successfully.')
         return redirect('user_settings')
     
-    return render(request, 'device/user_settings.html')
+    return render(request, 'device/user_settings.html',{
+                  'notifications': notifications})
+
+
+def subscriptions(request, device_id):
+    # Fetch the device based on the device_id
+    device = get_object_or_404(Device, device_id=device_id, user=request.user)
+    
+    # Example: Add subscription details (you'll need to adjust based on your model)
+    device.plan_name = "Premium"  # Example value; fetch from your model or database
+    device.plan_validity_days = 365  # Example value
+    device.plan_expiration_date = "2026-05-26"  # Example value; calculate based on start date
+    
+    context = {
+        'device': device,
+    }
+    return render(request, 'device/subscriptions.html', context)

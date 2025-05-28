@@ -1,119 +1,185 @@
 {% extends "base.html" %}
-{% block title %}Device Data - {{ device.device_id }}{% endblock %}
+{% comment %} {% block title %}Device Data - {{ device.device_id }}{% endblock %} {% endcomment %}
+{% block title %}Device Data - {{ device.alias }}{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold text-gray-700">Device Data: {{ device.device_id }}</h1>
-<p class="text-gray-500 mt-1">Detailed metrics for the device</p>
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4 text-gray-700">Device Data: {{ device.alias }}</h1>
+  <p class="text-gray-500 mb-8">Detailed metrics for the device</p>
 
-<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-gradient-to-r from-blue-400 to-blue-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
-        <h3 class="text-xl font-semibold text-white">Total Distance Traveled</h3>
-        <p class="text-3xl font-bold text-white">{{ metrics.total_distance|floatformat:2 }} km</p>
+  <!-- Metrics Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 ">
+    <!-- Total Distance Traveled -->
+    <div class="device-card animate__animated animate__zoomIn " style="animation-delay: 0.25s;">
+      <div class="inner flex flex-col justify-between">
+        <span class="pricing" style="background: linear-gradient(to right, #60A5FA, #3B82F6);">
+          <span class="text-black"><i class="fas fa-road"></i> Distance</span>
+        </span>
+        <p class="title text-black text-bold">Total Distance Traveled</p>
+        <p class="info text-gray-100 mt-auto">{{ metrics.total_distance|floatformat:2 }} km</p>
+      </div>
     </div>
 
-    <div class="bg-gradient-to-r from-green-400 to-green-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
-        <h3 class="text-xl font-semibold text-white">Average Speed</h3>
-        <p class="text-3xl font-bold text-white">{{ metrics.average_speed|floatformat:1 }} km/h</p>
+    <!-- Average Speed -->
+    <div class="device-card animate__animated animate__zoomIn" style="animation-delay: 0.50s;">
+      <div class="inner flex flex-col justify-between">
+        <span class="pricing" style="background: linear-gradient(to right, #4ADE80, #22C55E);">
+          <span class="text-black"><i class="fas fa-tachometer-alt"></i> Speed</span>
+        </span>
+        <p class="title text-black">Average Speed</p>
+        <p class="info text-gray-100 mt-auto">{{ metrics.average_speed|floatformat:1 }} km/h</p>
+      </div>
     </div>
 
-    <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
-        <h3 class="text-xl font-semibold text-white">Max/Min Speed</h3>
-        <p class="text-gray-100">Max: {{ metrics.max_speed|floatformat:1 }} km/h</p>
-        <p class="text-gray-100">Min: {{ metrics.min_speed|floatformat:1 }} km/h</p>
+    <!-- Max/Min Speed -->
+    <div class="device-card animate__animated animate__zoomIn" style="animation-delay: 0.75s;">
+      <div class="inner flex flex-col justify-between">
+        <span class="pricing" style="background: linear-gradient(to right, #FBBF24, #F59E0B);">
+          <span class="text-black"><i class="fa-solid fa-chart-line"></i> Speed Range</span>
+        </span>
+        <p class="title text-black">Max/Min Speed</p>
+        <div class="mt-auto">
+          <p class="info text-gray-100">Max: {{ metrics.max_speed|floatformat:1 }} km/h</p>
+          <p class="info text-gray-100">Min: {{ metrics.min_speed|floatformat:1 }} km/h</p>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-gradient-to-r from-indigo-400 to-indigo-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
-        <h3 class="text-xl font-semibold text-white">Weekly Metrics (Last 7 Days)</h3>
-        <p class="text-gray-100">Total Distance: {{ metrics.weekly_data.total_distance|floatformat:2 }} km</p>
-        <p class="text-gray-100">Average Speed: {{ metrics.weekly_data.average_speed|floatformat:1 }} km/h</p>
+    <!-- Weekly Metrics -->
+    <div class="device-card animate__animated animate__zoomIn" style="animation-delay: 1s;">
+      <div class="inner flex flex-col justify-between">
+        <span class="pricing" style="background: linear-gradient(to right, #2DD4BF, #14B8A6);">
+          <span class="text-black"><i class="fas fa-calendar-week"></i> Weekly</span>
+        </span>
+        <p class="title text-black">Weekly Metrics </p>
+        <div class="mt-auto">
+          <p class="info text-gray-100">Total Distance: {{ metrics.weekly_data.total_distance|floatformat:2 }} km</p>
+          <p class="info text-gray-100">Average Speed: {{ metrics.weekly_data.average_speed|floatformat:1 }} km/h</p>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-gradient-to-r from-red-400 to-red-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
-        <h3 class="text-xl font-semibold text-white">Rash Driving Instances</h3>
-        <p class="text-3xl font-bold text-white">{{ metrics.rash_driving_instances }} times</p>
-        <p class="text-gray-100 text-sm">Speed > 80 km/h</p>
+    <!-- Rash Driving Instances -->
+    <div class="device-card animate__animated animate__zoomIn" style="animation-delay: 1.20s;">
+      <div class="inner flex flex-col justify-between">
+        <span class="pricing" style="background: linear-gradient(to right, #F87171, #EF4444);">
+          <span class="text-black"><i class="fas fa-exclamation-triangle"></i> Alerts</span>
+        </span>
+        <p class="title text-black">Rash Driving</p>
+        <div class="mt-auto">
+          <p class="info text-gray-100">{{ metrics.rash_driving_instances }} times</p>
+          <p class="info text-gray-100 text-sm">Speed > 80 km/h</p>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-gradient-to-r from-teal-400 to-teal-500 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all h-full">
-        <h3 class="text-xl font-semibold text-white">Vehicle On/Off Changes</h3>
-        <p class="text-3xl font-bold text-white">{{ metrics.vehicle_status_changes }}</p>
-        <p class="text-gray-100">Number of status changes</p>
+    <!-- Vehicle On/Off Changes -->
+    <div class="device-card animate__animated animate__zoomIn" style="animation-delay: 1.50s;">
+      <div class="inner flex flex-col justify-between">
+        <span class="pricing" style="background: linear-gradient(to right, #818CF8, #6366F1);">
+          <span class="text-black"><i class="fas fa-power-off"></i> Status</span>
+        </span>
+        <p class="title text-black">Vehicle On/Off Changes</p>
+        <p class="info text-gray-100 mt-auto">{{ metrics.vehicle_status_changes }} changes</p>
+      </div>
     </div>
+  </div>
 </div>
 
+<style>
+.device-card {
+  border-radius: 16px;
+  box-shadow: 0 30px 30px -25px rgba(0, 38, 255, 0.205);
+  padding: 10px;
+  background-color: #fff;
+  color: #697e91;
+  max-width: 300px;
+  width: 100%;
+}
 
+.device-card strong {
+  font-weight: 600;
+  color: #192a2d;
+}
 
-    <canvas id="speedChart" class="mt-6"></canvas>
-</div>
+.device-card .inner {
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #e6f4ea;
+  border-radius: 12px;
+  position: relative;
+  height: 200px; /* Fixed height for uniformity */
+}
+
+.device-card .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.625em 0.75em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.device-card .pricing small {
+  color: #fff;
+  font-size: 0.75em;
+  margin-left: 0.25em;
+}
+
+.device-card .title {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.device-card .title + * {
+  margin-top: 0.75rem;
+}
+
+.device-card .info {
+  color: #697e91;
+}
+
+.device-card .info + * {
+  margin-top: 0.5rem;
+}
+</style>
 {% endblock %}
+
 {% block extra_scripts %}
 <script>
-    var ctx = document.getElementById('speedChart').getContext('2d');
-    var speedChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Total Avg', 'Weekly Avg', 'Max', 'Min'],
-            datasets: [{
-                label: 'Speed (km/h)',
-                data: [{{ metrics.average_speed }}, {{ metrics.weekly_data.average_speed }}, {{ metrics.max_speed }}, {{ metrics.min_speed }}],
-                borderColor: 'rgba(59, 130, 246, 1)',
-                backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                fill: true
-            }]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-</script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Theme Toggle
-      const themeToggle = document.getElementById('theme-toggle');
-      const themeIcon = document.getElementById('theme-icon');
-      const currentTheme = localStorage.getItem('theme') || 'light';
-      if (themeIcon) {
-        if (currentTheme === 'dark') {
-          document.documentElement.classList.add('dark');
-          themeIcon.classList.replace('fa-sun', 'fa-moon');
-        }
-        if (themeToggle) {
-          themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-              localStorage.setItem('theme', 'dark');
-              themeIcon.classList.replace('fa-sun', 'fa-moon');
-            } else {
-              localStorage.setItem('theme', 'light');
-              themeIcon.classList.replace('fa-moon', 'fa-sun');
-            }
-            console.log('Theme toggled:', document.documentElement.classList.contains('dark') ? 'Dark' : 'Light');
-          });
-        } else {
-          console.error('Theme toggle element not found');
-        }
-      } else {
-        console.error('Theme icon element not found');
-      }
-
-      // Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', () => { 
       const menuToggle = document.getElementById('menu-toggle');
       const sidebar = document.getElementById('sidebar');
+
+      // Function to set sidebar state based on screen size
+      function setSidebarState() {
+        if (window.innerWidth >= 1024) {
+          // Desktop (1024px and above): Sidebar open by default
+          sidebar.classList.remove('sidebar-hidden');
+        } else {
+          // Mobile and tablet (below 1024px): Sidebar closed by default
+          sidebar.classList.add('sidebar-hidden');
+        }
+      }
+
+      // Set initial sidebar state on page load
       if (menuToggle && sidebar) {
+        setSidebarState();
+
+        // Toggle sidebar on button click
         menuToggle.addEventListener('click', () => {
           sidebar.classList.toggle('sidebar-hidden');
           console.log('Sidebar toggled:', sidebar.classList.contains('sidebar-hidden') ? 'Closed' : 'Open');
         });
+
+        // Update sidebar state on window resize
+        window.addEventListener('resize', setSidebarState);
       } else {
         console.error('Sidebar toggle elements not found:', { menuToggle, sidebar });
-      }
-
-      // Ensure sidebar is visible on desktop
-      if (window.innerWidth >= 768) {
-        sidebar.classList.remove('sidebar-hidden');
       }
 
       // Notification Toggle and Mark as Read
@@ -189,7 +255,5 @@
         console.error(`Menu element not found for ID: ${id}`);
       }
     }
-  </script>
-
-
+</script>
 {% endblock %}

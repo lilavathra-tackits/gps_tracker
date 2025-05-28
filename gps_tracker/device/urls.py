@@ -12,10 +12,11 @@ urlpatterns = [
     path('devices/<str:device_id>/history-data/', views.device_history_data, name='device_history_data'),
     path('devices/<str:device_id>/device-data/', views.device_data, name='device_data'),
     path('devices/<str:device_id>/share/', views.share_device, name='share_device'),
-    path('devices/<str:device_id>/share/<int:share_id>/modify/', views.modify_share, name='modify_share'),
     path('devices/<str:device_id>/maintenance/', views.maintenance_status, name='maintenance_status'),
     path('devices/<str:device_id>/edit/', views.edit_device, name='edit_device'),
     path('devices/notifications/', views.notifications, name='notifications'),
-    path('devices/notifications/<int:notification_id>/mark-read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/<int:notification_id>/mark-read/', views.mark_notification_read, name='mark_notification_read'),
     path('settings/', views.user_settings, name='user_settings'),
+    path('devices/shares/manage/', views.manage_all_shares, name='manage_all_shares'),
+    path('subscriptions/<str:device_id>/', views.subscriptions, name='subscriptions'),
 ]

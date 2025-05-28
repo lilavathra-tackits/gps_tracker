@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load device_tags %}
+{% block title %}Manage All Shares{% endblock %}
+{% block content %}
+<div class="container mx-auto p-6 animate__animated animate__fadeIn">
+  <div class="bg-[#dde1e2] p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4 text-gray-700">Manage All Shares</h2>
+
+
+    {% if shares %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for device in devices %}
+          {% with device_shares=shares|filter_shares:device %}
+            {% if device_shares %}
+              <div class="share-card">
+                <div class="inner">
+                  <span class="pricing">
+                    <span>Shared ({{ device_shares|length }})</span>
+                  </span>
+                  <p class="title">{{ device.alias|default:device.device_id }}</p>
+                  <p class="info">ID: {{ device.device_id }}</p>
+                  <div class="mt-4">
+                    {% for share in device_shares %}
+                      <form method="post" class="flex justify-between items-center py-2 border-t border-gray-300">
+                        {% csrf_token %}
+                        <div class="text-sm text-gray-600">
+                          {{ share.shared_with.username }} ({{ share.permission|title }})
+                        </div>
+                        <input type="hidden" name="share_id" value="{{ share.id }}">
+                        <input type="hidden" name="action" value="delete">
+                        <button type="submit" class="bg-[#13af80] text-white px-3 py-1 rounded hover:bg-[#0f8c62] transition duration-300">
+                          <i class="fas fa-trash-alt"></i> Remove
+                        </button>
+                      </form>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endwith %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-gray-600">No shares found for your devices.</p>
+    {% endif %}
+        <a href="{% url 'device_list' %}" class="inline-block bg-[#13af80] text-white px-4 py-2 rounded hover:bg-[#0f8c62] transition duration-300 mt-6">
+      <i class="fas fa-arrow-left"></i> Back to Device List
+    </a>
+  </div>
+</div>
+
+<style>
+.share-card {
+  border-radius: 16px;
+  box-shadow: 0 30px 30px -25px rgba(0, 38, 255, 0.205);
+  padding: 10px;
+  background-color: #fff;
+  color: #697e91;
+  max-width: 300px;
+  width: 100%;
+}
+
+.share-card strong {
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.share-card .inner {
+  align-items: center;
+  padding: 20px;
+  padding-top: 40px;
+  background-color: #e0f2fe; /* Light blue for Share Cards */
+  border-radius: 12px;
+  position: relative;
+}
+
+.share-card .pricing {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #bae6fd; /* Complementary blue for Share Cards */
+  border-radius: 99em 0 0 99em;
+  display: flex;
+  align-items: center;
+  padding: 0.625em 0.75em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #192a2d;
+}
+
+.share-card .pricing small {
+  color: #707a91;
+  font-size: 0.75em;
+  margin-left: 0.25em;
+}
+
+.share-card .title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #192a2d;
+}
+
+.share-card .title + * {
+  margin-top: 0.75rem;
+}
+
+.share-card .info {
+  color: #697e91;
+}
+
+.share-card .info + * {
+  margin-top: 1rem;
+}
+</style>
+{% endblock %}
