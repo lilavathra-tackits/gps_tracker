@@ -2,19 +2,23 @@
 {% block title %}GPS Tracker - Home{% endblock %}
 {% block content %}
 <div class="container mx-auto p-6">
-  <!-- Device Stats -->
-  {% comment %} <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 animate__animated animate__backInDown ">
-    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
-      <h3 class="text-lg font-semibold text-[#192a2d]">Total Devices Linked</h3>
-      <p class="text-3xl font-bold mt-2 text-gray-700">{{ total_devices }}</p>
-    </div>
-    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
-      <h3 class="text-lg font-semibold text-[#192a2d]">Active Devices</h3>
-      <p class="text-3xl font-bold mt-2 text-gray-700">{{ active_devices }}</p>
-    </div>
-  </div> {% endcomment %}
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 animate__animated animate__fadeInDown">
+    <div class="bg-white/80 backdrop-blur-sm border-b border-slate-200 rounded-lg p-6 shadow-lg animate__animated animate__fadeInDown">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">
+          GPS Tracker
+        </h1>
+        <p class="text-slate-600 mt-1">Monitor and manage your GPS tracking devices</p>
+      </div>
+      <a href="{% url 'add_device' %}" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg px-4 py-2 rounded-lg transition-all duration-300">
+        <i class="fas fa-plus-circle w-4 h-4 mr-2"></i>
+        Add Device
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 mb-8 animate__animated animate__fadeInDown">
   <!-- Card 1: Total Devices Linked -->
   <div class="relative z-10 p-6 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 shadow-xl hover:shadow-2xl transition duration-300  overflow-hidden">
     <!-- Background Icon -->
@@ -36,15 +40,47 @@
       <p class="text-4xl font-extrabold mt-2 ">{{ active_devices }}</p>
     </div>
   </div>
+
+  <!-- Card 3: Shared Devices -->
+
+  <div class="relative z-10 p-6 rounded-2xl bg-gradient-to-br from-lime-100 to-lime-200 shadow-xl hover:shadow-2xl transition duration-300 overflow-hidden">
+    <!-- Background Icon -->
+    <i class="bi bi-radar text-[100px] text-lime-400/20 absolute bottom-2 right-4 z-0"></i>
+
+    <div class="relative z-10">
+      <h3 class="text-xl font-semibold  tracking-wide">Shared Devices</h3>
+      <p class="text-4xl font-extrabold mt-2 ">{{ active_devices }}</p>
+    </div>
+  </div>
+
+  <!-- Card 3: xyz -->
+  <div class="relative z-10 p-6 rounded-2xl bg-gradient-to-br from-fuchsia-100 to-fuchsia-200 shadow-xl hover:shadow-2xl transition duration-300 overflow-hidden">
+    <!-- Background Icon -->
+    <i class="bi bi-broadcast-pin text-[100px] text-fuchsia-400/20 absolute bottom-2 right-4 z-0"></i>
+
+    <div class="relative z-10">
+      <h3 class="text-xl font-semibold  tracking-wide">xyz</h3>
+      <p class="text-4xl font-extrabold mt-2 ">{{ active_devices }}</p>
+    </div>
+  </div>
 </div>
 
 
   <!-- Device Cards -->
-  <h2 class="text-2xl font-bold mb-4 text-gray-700">Your Devices</h2>
+    <div class="flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-grey-700 mt-3 mb-8">Your Devices</h2>
+      <a href="{% url 'device_list' %}" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg px-4 py-2 rounded-lg transition-all duration-300">
+        <i class="fas fa-cog mr-2"></i>
+        Manage All
+      </a>
+    </div>
+  {% comment %} <h2 class="text-2xl font-bold mb-4 text-gray-700">Your Devices</h2> {% endcomment %}
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 " data-aos="fade-up">
     {% for item in all_devices %}
       <div class="device-card ">
         <div class="inner">
+        <i class="bi bi-cpu text-[65px] text-[#c3e6cb]/40 absolute bottom-15 right-4 z-0"></i>
+
           <span class="pricing {% if item.is_shared %}shared-device{% endif %}">
             <span>
               {% if item.is_shared %}<i class="fa-solid fa-share"></i> Shared{% else %}<i class="fa-solid fa-lock"></i> Owned{% endif %}
@@ -54,9 +90,9 @@
           {% comment %} <p class="info">Status: <span class="font-medium">{{ item.status }}</span> <span class=" absolute w-4 h-4 bg-lime-500 rounded-full animate-pulse"></span></p> {% endcomment %}
           
           {% if item.status == "Active" %}
-          <p class="info">Status: <span class="font-medium bg-green-400 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse"><i class="bi bi-check-circle-fill"></i> {{ item.status }}</span></p>
+          <p class="info">Status: <span class="font-medium bg-green-400 text-black text-xs me-2 px-2.5 py-0.5 rounded-full "><i class="bi bi-check-circle-fill"></i> {{ item.status }}</span></p>
           {% elif item.status == "Inactive" %}
-          <p class="info">Status: <span class="font-medium bg-red-400 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse "><i class="bi bi-x-circle-fill"></i> {{ item.status }}</span></p>
+          <p class="info">Status: <span class="font-medium bg-red-400 text-black text-xs me-2 px-2.5 py-0.5 rounded-full  "><i class="bi bi-x-circle-fill"></i> {{ item.status }}</span></p>
           {% endif %}
 
               {% comment %} <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div> {% endcomment %}
@@ -76,14 +112,49 @@
 
   <!-- Tutorial Section -->
   <h2 class="text-2xl font-bold mb-4 text-gray-700">How to Use Your GPS Tracker</h2>
-  <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border mb-8">
-    <h3 class="text-lg font-semibold text-[#192a2d]">Getting Started</h3>
+  <div class="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border mb-8" data-aos="fade-up">
+    {% comment %} <h3 class="text-lg font-semibold text-[#192a2d]">Getting Started</h3> {% endcomment %}
+    <h2 class="text-2xl text-blue-900 flex items-center gap-2 mb-4">
+      <i class="fas fa-chart-line"></i>
+      Getting Started with GPS Tracking
+    </h2>
     <ul class="list-disc list-inside text-sm mt-2 space-y-2 text-gray-700">
-      <li>Add a device using its ID and password in the Devices section.</li>
-      <li>View real-time data like speed, location, and battery on the device dashboard.</li>
-      <li>Share your device with others via email for view-only access.</li>
-      <li>Check notifications for alerts like high speed or maintenance needs.</li>
-      <li>Visit the subscription section to manage device plans (coming soon).</li>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-blue-900">Quick Setup</h3>
+        <ul class="space-y-2 text-blue-800">
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
+            <span>Add a device using its ID and password in the Devices section</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
+            <span>View real-time data like speed, location, and battery on the dashboard</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
+            <span>Share your device with others via email for view-only access</span>
+          </li>
+        </ul>
+      </div>
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-blue-900">Advanced Features</h3>
+        <ul class="space-y-2 text-blue-800">
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
+            <span>Check notifications for alerts like high speed or maintenance needs</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
+            <span>Visit the subscription section to manage device plans</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
+            <span>Monitor multiple devices from a single dashboard</span>
+          </li>
+        </ul>
+      </div>
+    </div>
     </ul>
   </div>
 

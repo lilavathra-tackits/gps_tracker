@@ -52,6 +52,7 @@ def home(request):
         })
     
     return render(request, 'device/home.html', {
+    # return render(request, 'ind.html', {
         'total_devices': total_devices,
         'active_devices': active_devices,
         'all_devices': all_devices,
