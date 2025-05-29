@@ -530,7 +530,7 @@ def user_settings(request):
     return render(request, 'device/user_settings.html',{
                   'notifications': notifications})
 
-
+@login_required
 def subscriptions(request, device_id):
     # Fetch the device based on the device_id
     device = get_object_or_404(Device, device_id=device_id, user=request.user)

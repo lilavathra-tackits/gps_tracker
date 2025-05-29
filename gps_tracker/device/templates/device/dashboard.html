@@ -7,7 +7,7 @@
 <!-- First Row: Speed, Battery, Compass -->
 <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
     <!-- Speed -->
-    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border ">
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border " data-aos="zoom-in-right">
         <h3 class="text-lg font-semibold text-[#192a2d] mb-2"><i class="fa-solid fa-gauge"></i> Speed</h3>
         <canvas id="speedometer" class="mt-4 max-w-[250px] h-[200px] mx-auto"></canvas>
         <p class="text-gray-700 mt-2 text-base">Speed: 
@@ -22,7 +22,7 @@
     </div>
 
     <!-- Battery -->
-    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border ">
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border " data-aos="zoom-in">
         <h3 class="text-lg font-semibold text-[#192a2d] mb-2"><i class="fa-solid fa-battery-half"></i> Battery Charge</h3>
         <canvas id="batteryGauge" width="200" height="200" class="mx-auto block"></canvas>
         <p class="text-gray-700 mt-2 text-base">Battery: 
@@ -37,7 +37,7 @@
     </div>
 
     <!-- Compass -->
-    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border">
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 text-center h-full border" data-aos="zoom-in-left">
         <h3 class="text-lg font-semibold text-[#192a2d] mb-4"><i class="fa-solid fa-compass"></i> Heading</h3>
         <canvas id="compass" width="150" height="150" class="mx-auto"></canvas>
         <p class="text-gray-700 mt-2 text-base">Heading: 
@@ -54,7 +54,7 @@
 
 <!-- Location Details -->
 <div class="mt-6">
-    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
+    <div class="bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border " data-aos="zoom-in">
         <h3 class="text-lg font-semibold text-[#192a2d] mb-4">Location Details</h3>
         <div class="flex flex-col sm:flex-row gap-4">
             <!-- Left: Coordinates and Altitude -->
@@ -144,7 +144,7 @@
 </div>
 
 <!-- Map Section -->
-<div class="mt-8 bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border ">
+<div class="mt-8 bg-[#dde1e2] p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border "data-aos="fade-up">
     <h2 class="text-xl sm:text-2xl font-bold text-[#192a2d] mb-4">Device Location</h2>
     <div id="map" class="h-[300px] sm:h-[400px] w-full rounded-lg"></div>
     <p class="text-center text-sm sm:text-base font-medium text-gray-700 mt-4">
@@ -473,6 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         console.error('Sidebar toggle elements not found:', { menuToggle, sidebar });
       }
+      
 
       // Ensure sidebar is visible on desktop
       if (window.innerWidth >= 768) {
@@ -552,5 +553,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error(`Menu element not found for ID: ${id}`);
       }
     }
+  </script>
+    <script>
+  AOS.init();
   </script>
 {% endblock %}

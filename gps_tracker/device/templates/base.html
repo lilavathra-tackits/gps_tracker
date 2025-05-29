@@ -9,13 +9,13 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
   <style>
     body { 
@@ -25,13 +25,13 @@
     }
     .navbar { 
       height: 64px; 
-      background-color: #192a2d; /* Primary color for navbar */
-      z-index: 1000; /* Ensure navbar is above everything */
+      background-color: #192a2d; 
+      z-index: 1000; 
     }
     .sidebar { 
       transition: transform 0.3s ease-in-out; 
-      background-color: #192a2d; /* Primary color for sidebar */
-      z-index: 200; /* Above map (100) but below right dock (500) */
+      background-color: #192a2d; 
+      z-index: 200; 
     }
     .sidebar-hidden { 
       transform: translateX(-100%); 
@@ -39,20 +39,20 @@
     .notification-dropdown { 
       display: none; 
       transition: all 0.3s ease; 
-      z-index: 700; /* Above sidebar but below navbar */
-      background-color: #dde1e2; /* Third color for card backgrounds */
+      z-index: 700; 
+      background-color: #dde1e2;
     }
     .notification-dropdown.active { 
       display: block; 
     }
     .right-dock { 
       display: flex; 
-      background-color: #192a2d; /* Primary color for right dock */
-      z-index: 500; /* Above map and sidebar but below navbar */
+      background-color: #192a2d; 
+      z-index: 500; 
     }
     .toast { 
-      background-color: #dde1e2 !important; /* Third color for toasts */
-      z-index: 800 !important; /* Above sidebar and right dock but below navbar */
+      background-color: #dde1e2 !important; 
+      z-index: 800 !important; 
     }
     .animate-fade-in { 
       animation: fade-in 0.3s ease-in-out; 
@@ -83,7 +83,7 @@
             <span id="notification-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
           </button>
 
-          <div id="notification-dropdown" class="notification-dropdown absolute right-0 mt-2 w-80 shadow-lg rounded-lg p-4">
+          <div id="notification-dropdown" class="notification-dropdown absolute -right-10 mt-2 w-80 shadow-lg rounded-lg p-4">
             <h3 class="text-sm font-semibold text-gray-700 mb-2">Recent Notifications</h3>
             <ul id="notification-list" class="space-y-2 text-sm text-gray-600 max-h-60 overflow-y-auto">
               {% for notification in notifications|slice:":10" %}
@@ -187,7 +187,7 @@
   </div>
 
   <!-- Right-side dock -->
-  <div class="right-dock text-white fixed right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 shadow-lg p-2 rounded-lg">
+  <div class="right-dock text-white right-0 fixed top-1/2 transform -translate-y-1/2 flex flex-col gap-4 shadow-lg p-2 rounded-lg">
     <a href="{% url 'home' %}" class="text-xl p-2">
       <i class="fas fa-home"></i>
     </a>
@@ -361,6 +361,9 @@
     } else {
       console.error('No icon elements found in right-dock');
     }
+  </script>
+  <script>
+  AOS.init();
   </script>
   {% endblock %}
 </body>

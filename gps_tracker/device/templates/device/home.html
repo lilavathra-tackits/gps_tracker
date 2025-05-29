@@ -41,7 +41,7 @@
 
   <!-- Device Cards -->
   <h2 class="text-2xl font-bold mb-4 text-gray-700">Your Devices</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 " data-aos="fade-up">
     {% for item in all_devices %}
       <div class="device-card ">
         <div class="inner">
@@ -54,9 +54,9 @@
           {% comment %} <p class="info">Status: <span class="font-medium">{{ item.status }}</span> <span class=" absolute w-4 h-4 bg-lime-500 rounded-full animate-pulse"></span></p> {% endcomment %}
           
           {% if item.status == "Active" %}
-          <p class="info">Status: <span class="font-medium bg-green-300 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse"><i class="bi bi-check-circle-fill"></i> {{ item.status }}</span></p>
+          <p class="info">Status: <span class="font-medium bg-green-400 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse"><i class="bi bi-check-circle-fill"></i> {{ item.status }}</span></p>
           {% elif item.status == "Inactive" %}
-          <p class="info">Status: <span class="font-medium bg-red-300 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse "><i class="bi bi-x-circle-fill"></i> {{ item.status }}</span></p>
+          <p class="info">Status: <span class="font-medium bg-red-400 text-black text-xs me-2 px-2.5 py-0.5 rounded-full animate-pulse "><i class="bi bi-x-circle-fill"></i> {{ item.status }}</span></p>
           {% endif %}
 
               {% comment %} <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div> {% endcomment %}
@@ -92,7 +92,7 @@
   <h2 class="text-2xl font-bold mb-4 text-gray-700">Choose a Subscription Plan</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
     <!-- Standard Plan -->
-    <div class="subscription-card relative overflow-hidden">
+    <div class="subscription-card relative overflow-hidden" data-aos="zoom-in-right">
       <div class="absolute top-0 left-0 w-16 h-16 z-50">
         <div class="absolute transform -rotate-45 bg-gold text-center text-white font-medium py-1 left-[-35px] top-[32px] w-[170px] text-xs">
           50% off
@@ -142,7 +142,7 @@
     </div>
 
     <!-- Premium Plan -->
-    <div class="subscription-card relative overflow-hidden">
+    <div class="subscription-card relative overflow-hidden" data-aos="zoom-in">
       <div class="absolute top-0 left-0 w-16 h-16 z-50">
         <div class="absolute transform -rotate-45 bg-gold text-center text-white font-medium py-1 left-[-35px] top-[32px] w-[170px] text-xs">
           Best Value
@@ -192,7 +192,7 @@
     </div>
 
     <!-- Enterprise Plan -->
-    <div class="subscription-card relative overflow-hidden">
+    <div class="subscription-card relative overflow-hidden" data-aos="zoom-in-left">
       <div class="absolute top-0 left-0 w-16 h-16 z-50">
         <div class="absolute transform -rotate-45 bg-gold text-center text-white font-medium py-1 left-[-35px] top-[32px] w-[170px] text-xs">
           For Teams
@@ -245,7 +245,8 @@
 
   <!-- Device Plans (Updated Section) -->
   <h2 class="text-2xl font-bold mb-4 text-gray-700">Device Plans</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-aos="fade-up"
+     data-aos-anchor-placement="center-bottom">
     {% for item in all_devices %}
       <div class="subscription-card relative overflow-hidden">
         <div class="inner">

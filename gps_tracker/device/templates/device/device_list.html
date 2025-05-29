@@ -20,13 +20,6 @@
           {% for device in devices %}
             <div class="device-card">
               <div class="inner">
-                {% comment %} <span class="pricing {% with shares=device.deviceshare_set.all %}{% if shares %}shared-device{% endif %}{% endwith %}">
-                  <span>
-                    {% with shares=device.deviceshare_set.all %}
-                      {% if shares %}You Shared {% else %}Owned{% endif %}
-                    {% endwith %}
-                  </span>
-                </span> {% endcomment %}
                 <!-- Row 1: Device Name and ID -->
                 <p class="title">{{ device.alias|default:device.device_id }}</p>
                 <p class="info whitespace-nowrap">ID: {{ device.device_id|truncate_id }}</p>
